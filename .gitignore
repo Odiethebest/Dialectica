@@ -16,6 +16,9 @@ backend/chroma_db/
 node_modules/
 dist/
 
+# IDE
+.idea/
+
 # OS
 .DS_Store
 
