@@ -554,44 +554,64 @@ body {
   animation: parchment-in 200ms ease-out both;
 }
 
-/* ── Category bar ─────────────────────────────────────────────────────────── */
+/* ── CATEGORY TAGS: ONE-LINE FIX ──────────────────────────
+   Root cause: icons (~20px each) push total width over 390px.
+   Fix: hide icons on mobile, tighten padding and font-size.
+   ---------------------------------------------------------- */
 
+/* Base (desktop) — full labels + icons, comfortable spacing */
 .d-category-bar {
   display: flex;
-  flex-wrap: wrap;
   gap: 8px;
+  flex-wrap: nowrap;
+  align-items: center;
   margin-bottom: 20px;
 }
 
 .d-category-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  font-family: var(--d-sans);
-  font-size: 12px;
-  letter-spacing: 0.04em;
-  color: var(--d-mid);
-  border: 1px solid var(--d-bg3);
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 13px;
+  font-style: italic;
+  color: #7A4A30;
+  border: 1px solid #EDE4D8;
   border-radius: 20px;
   padding: 6px 14px;
-  background: transparent;
+  background: none;
   cursor: pointer;
-  transition: background 100ms ease, color 100ms ease, border-color 100ms ease;
-}
-
-.d-category-btn:hover {
-  border-color: var(--d-gold2);
-  color: var(--d-body);
-}
-
-.d-category-btn.active {
-  background: var(--cat-color, var(--d-maroon));
-  color: #fff;
-  border-color: var(--cat-color, var(--d-maroon));
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 100ms;
 }
 
 .d-cat-icon { font-size: 13px; line-height: 1; }
 .d-cat-label { }
+.d-cat-label[data-label-full]::before { content: attr(data-label-full); }
+
+/* Active + hover states */
+.d-category-btn.active {
+  background: var(--cat-color, var(--d-maroon));
+  color: #F5EAD8;
+  border-color: var(--cat-color, var(--d-maroon));
+}
+.d-category-btn:hover:not(.active) {
+  border-color: var(--d-gold2);
+  color: #6B1020;
+}
+
+/* Mobile (≤ 480px) — hide icons, tighter padding + abbreviated labels */
+@media (max-width: 480px) {
+  .d-category-bar { gap: 6px; }
+
+  .d-category-btn {
+    font-size: 12px;
+    padding: 5px 10px;
+    gap: 0;
+  }
+
+  .d-cat-icon { display: none; }
+}
 
 /* ── Category claim cards ──────────────────────────────────────────────────── */
 

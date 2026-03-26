@@ -27,6 +27,9 @@ export default function ClaimInput({ claim, onChange, onSubmit, onAutoSubmit, la
     textareaRef.current?.focus()
   }
 
+  // EN-only short labels for mobile (ZH categories are already compact)
+  const EN_SHORT_LABELS = { Technology: 'Tech', Philosophy: 'Phil.' }
+
   // Switch category/claim data based on lang
   const categories    = lang === 'zh' ? ZH_CATEGORIES    : CATEGORIES
   const claimsByCategory = lang === 'zh' ? ZH_CLAIMS_BY_CATEGORY : CLAIMS_BY_CATEGORY
@@ -59,7 +62,15 @@ export default function ClaimInput({ claim, onChange, onSubmit, onAutoSubmit, la
             onClick={() => setActiveCategory(activeCategory === name ? null : name)}
           >
             <span className="d-cat-icon">{icon}</span>
-            <span className="d-cat-label">{name}</span>
+            {lang === 'en' ? (
+              <span
+                className="d-cat-label"
+                data-label-full={name}
+                data-label-short={EN_SHORT_LABELS[name] ?? name}
+              />
+            ) : (
+              <span className="d-cat-label">{name}</span>
+            )}
           </button>
         ))}
       </div>
