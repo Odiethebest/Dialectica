@@ -1,4 +1,4 @@
-# Dialectica — Architecture & Project Structure
+# Architecture and Project Structure
 
 ## Architecture
 
@@ -7,7 +7,7 @@ User Input (claim / draft / thesis)
         │
         ▼
 ┌─────────────────────────────────────────┐
-│           LangGraph State Machine        │
+│           LangGraph State Machine       │
 │                                         │
 │  [Understand]  → Extract core claim     │
 │       ↓                                 │
