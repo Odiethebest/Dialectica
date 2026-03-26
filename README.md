@@ -106,7 +106,7 @@ The app will be available at `http://localhost:5173`.
 
 ## About
 
-Built by [Odie Yang](https://odieyang.com) — MS CS at Northeastern University (Distributed Systems, NLP).
+Built by [Odie Yang](https://odieyang.com), an CS Gradute at Northeastern
 
 Part of a portfolio exploring the intersection of AI agent architectures and human reasoning.
 
