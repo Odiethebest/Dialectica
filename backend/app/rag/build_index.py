@@ -24,7 +24,8 @@ logger = logging.getLogger(__name__)
 # Paths relative to this file: backend/app/rag/build_index.py
 BACKEND_DIR = Path(__file__).parent.parent.parent
 CORPUS_DIR = BACKEND_DIR / "data" / "corpus"
-CHROMA_DIR = Path(os.getenv("CHROMA_DB_PATH", "/data/chroma_db"))
+CHROMA_DB_PATH = os.getenv("CHROMA_DB_PATH", "/data/chroma_db")
+CHROMA_DIR = Path(CHROMA_DB_PATH)
 COLLECTION_NAME = "dialectica_corpus"
 
 
