@@ -2,23 +2,35 @@
 
 > *"An unexamined argument is not worth making."*
 
-**Dialectica** is a Socratic argument-refinement engine. You submit a claim — a thesis, a half-formed idea, a position you want to defend. Dialectica doesn't validate it. It attacks it, questions it, and forces you to think harder. What comes out the other side is an argument worth making.
+Most AI tools agree with you. Dialectica doesn't.
+
+Submit a claim — a thesis, a conviction, a position you've half-formed in your head. The engine won't validate it. It will find its weakest point, attack it with grounded evidence, and refuse to let you off the hook until you've thought harder. What comes out the other side isn't just a stronger argument. It's one you've actually earned.
 
 ---
 
-## What It Does
+## How It Works
 
-Inspired by the Socratic method, Dialectica simulates the adversarial dialogue that separates a weak claim from a defensible one. Given an input like:
+Dialectica runs every claim through five adversarial stages — the same structure Socrates used to separate belief from knowledge, now powered by LangGraph, RAG over a curated philosophical corpus, and real-time web search.
 
-> *"Social media has made people more politically polarized."*
+Take the claim: *"Social media has made people more politically polarized."*
 
-The system runs through five stages:
+**Understand** — Strips the claim to its core proposition. Surfaces the assumptions hiding underneath it: that polarization has increased, that social media caused it, that the effect is widespread.
 
-1. **Understand** — Distills your claim to its core proposition and surfaces implicit assumptions
-2. **Steelman** — Retrieves supporting evidence and constructs the strongest possible case for your position
-3. **Attack** — Generates grounded counterarguments using a philosophical knowledge base and real-world web search
-4. **Interrogate** — Poses three targeted Socratic questions you cannot easily dodge
-5. **Synthesize** — After your responses, produces a refined argument and a structured reasoning map
+**Steelman** — Before attacking, it defends. Retrieves the strongest supporting evidence and constructs the most compelling version of your argument — so when the attack comes, you know exactly what's being dismantled.
+
+**Attack** — Three grounded counterarguments, each from a different angle. Not generic pushback. Evidence-backed, source-cited, and deliberately uncomfortable. *Political polarization in the US predates social media by decades. Bail et al. (Science, 2018) found most users aren't exposed to primarily political content. Cross-national data shows no consistent correlation.*
+
+**Interrogate** — Three Socratic questions you cannot easily dodge. Not open-ended prompts — pointed premises you must either defend or concede. *If polarization predates these platforms, what causal mechanism makes social media the driver rather than the accelerant?*
+
+**Synthesize** — You respond. The engine reads your answers, weighs what held and what didn't, and produces a refined claim alongside a structured reasoning map: what you conceded, what you retained, what vulnerabilities remain, and how much stronger the argument became.
+
+---
+
+## What Comes Out
+
+Not a verdict. Not a score. A better argument — and a clearer understanding of why it's better.
+
+The kind of thinking that used to require a good professor, an honest friend, or a very patient adversary.
 
 ---
 
