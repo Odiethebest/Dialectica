@@ -7,6 +7,7 @@ class Settings(BaseSettings):
     chroma_db_path: str = "./chroma_db"
     default_model: str = "gpt-4o-mini"
     synthesis_model: str = "gpt-4o"
+    embedding_model: str = "text-embedding-3-small"
     max_rounds: int = 2
     cors_origins_str: str = "https://odieyang.com,https://www.odieyang.com"
 
