@@ -14,7 +14,6 @@ backend/chroma_db/
 
 # Node
 node_modules/
-dist/
 
 # IDE
 .idea/
