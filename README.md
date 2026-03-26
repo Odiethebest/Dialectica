@@ -2,7 +2,7 @@
 
 > *"An unexamined argument is not worth making."*
 
-**Dialectica** is a Socratic argument-refinement engine. You submit a claim — a thesis, a half-formed idea, a position you want to defend. Dialectica doesn't validate it. It attacks it, questions it, and forces you to think harder. What comes out the other side is an argument worth making.
+**Dialectica** is a Socratic argument-refinement engine. You submit a claim — a thesis, a half-formed idea, a position you want to defend. Dialectica doesn't validate it. It attacks it, questions it, and forces you to think harder. What comes out the other side is an argument worth making. *([Why this approach?](INSPIRATION.md))*
 
 ---
 
@@ -19,6 +19,8 @@ The system runs through five stages:
 3. **Attack** — Generates grounded counterarguments using a philosophical knowledge base and real-world web search
 4. **Interrogate** — Poses three targeted Socratic questions you cannot easily dodge
 5. **Synthesize** — After your responses, produces a refined argument and a structured reasoning map
+
+*The epistemology behind each stage is in [INSPIRATION.md](INSPIRATION.md).*
 
 ---
 
