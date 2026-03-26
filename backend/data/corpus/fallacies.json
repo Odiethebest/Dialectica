@@ -1,0 +1,352 @@
+[
+  {
+    "name": "Ad Hominem",
+    "category": "Relevance",
+    "description": "Attacking the person making an argument rather than the argument itself. The truth of a claim is independent of the character or motives of the person asserting it.",
+    "example": "You can't trust John's argument about climate change — he drives a gas-powered car.",
+    "structure": "Person P makes claim C. Person P has flaw F. Therefore C is false."
+  },
+  {
+    "name": "Straw Man",
+    "category": "Relevance",
+    "description": "Misrepresenting an opponent's argument by exaggerating, distorting, or oversimplifying it, then attacking the distorted version rather than the actual position.",
+    "example": "You said we should reduce military spending. So you want to leave the country completely defenseless?",
+    "structure": "Person P holds position X. Distorted version X' is presented. X' is refuted. Therefore X is false."
+  },
+  {
+    "name": "False Dichotomy",
+    "category": "Presumption",
+    "description": "Presenting only two options as if they are the only possibilities when other alternatives exist. Also called false dilemma or either-or fallacy.",
+    "example": "You're either with us or against us.",
+    "structure": "Either A or B. Not A. Therefore B. (Ignoring alternatives C, D, etc.)"
+  },
+  {
+    "name": "Slippery Slope",
+    "category": "Causal",
+    "description": "Claiming that a relatively small first step inevitably leads to a chain of negative consequences without establishing the causal links.",
+    "example": "If we allow same-sex marriage, next people will want to marry their pets.",
+    "structure": "A leads to B, B leads to C, C leads to D (without justification). D is bad. Therefore A is bad."
+  },
+  {
+    "name": "Hasty Generalization",
+    "category": "Inductive",
+    "description": "Drawing a broad conclusion from a small or unrepresentative sample. The sample size is too small to support the generalization.",
+    "example": "I met two rude people from that city — people there must be unfriendly.",
+    "structure": "Small sample S has property P. Therefore all members of the population have P."
+  },
+  {
+    "name": "Post Hoc Ergo Propter Hoc",
+    "category": "Causal",
+    "description": "Assuming that because one event followed another, the first caused the second. Temporal sequence does not establish causation.",
+    "example": "I wore my lucky socks and then we won the game. My socks caused the win.",
+    "structure": "A occurred before B. Therefore A caused B."
+  },
+  {
+    "name": "Appeal to Authority",
+    "category": "Relevance",
+    "description": "Treating the opinion of an authority as evidence in a domain where they have no special expertise, or appealing to authority in lieu of argument.",
+    "example": "A famous actor says this diet works, so it must be effective.",
+    "structure": "Authority X believes claim C. Therefore C is true."
+  },
+  {
+    "name": "Appeal to Popularity",
+    "category": "Relevance",
+    "description": "Arguing that something is true or good because many people believe it or do it. Also known as argumentum ad populum or bandwagon fallacy.",
+    "example": "Millions of people believe in astrology, so there must be something to it.",
+    "structure": "Many people believe C. Therefore C is true."
+  },
+  {
+    "name": "Circular Reasoning",
+    "category": "Presumption",
+    "description": "The conclusion is used as a premise in the argument itself, either explicitly or in a disguised form. Also called begging the question.",
+    "example": "The Bible is true because it says so in the Bible.",
+    "structure": "C is true because of P, where P assumes C."
+  },
+  {
+    "name": "Red Herring",
+    "category": "Relevance",
+    "description": "Introducing an irrelevant topic to divert attention from the original issue. The introduced topic has no logical bearing on the conclusion.",
+    "example": "Why worry about the budget deficit when there are people starving in the world?",
+    "structure": "Issue A is raised. Topic B (unrelated) is introduced. Conclusion about A is drawn from B."
+  },
+  {
+    "name": "Appeal to Ignorance",
+    "category": "Presumption",
+    "description": "Claiming something is true because it has not been proven false, or false because it has not been proven true. Absence of evidence is not evidence of absence.",
+    "example": "No one has ever proven that ghosts don't exist, so they must exist.",
+    "structure": "There is no proof that not-C. Therefore C is true."
+  },
+  {
+    "name": "False Equivalence",
+    "category": "Presumption",
+    "description": "Treating two significantly different things as if they are equivalent or comparable in relevant respects when they are not.",
+    "example": "Teaching evolution and creationism is the same — both are just theories.",
+    "structure": "A and B share superficial feature F. Therefore A and B are equivalent in all relevant respects."
+  },
+  {
+    "name": "Equivocation",
+    "category": "Ambiguity",
+    "description": "Using a word in two different senses within the same argument, exploiting its ambiguity to reach a misleading conclusion.",
+    "example": "Nothing is better than eternal happiness. A ham sandwich is better than nothing. Therefore a ham sandwich is better than eternal happiness.",
+    "structure": "Word W means X in premise 1. W means Y in premise 2. Conclusion drawn as if W is consistent."
+  },
+  {
+    "name": "Appeal to Emotion",
+    "category": "Relevance",
+    "description": "Using emotional manipulation rather than valid reasoning to persuade. Emotions are used as a substitute for logical evidence.",
+    "example": "Think of the children! We can't allow this policy.",
+    "structure": "Claim C evokes emotion E. Therefore C is true or should be acted upon."
+  },
+  {
+    "name": "No True Scotsman",
+    "category": "Presumption",
+    "description": "Redefining a category to exclude counterexamples that would refute a generalization, rather than acknowledging the counterexample.",
+    "example": "No true Scotsman would do such a thing. (After being told a Scotsman did it.) Well, no true Scotsman would.",
+    "structure": "All members of group G have property P. Person Q is in G and lacks P. Redefine G to exclude Q."
+  },
+  {
+    "name": "Composition",
+    "category": "Ambiguity",
+    "description": "Inferring that a whole has a property because its parts have that property. What is true of the parts is not necessarily true of the whole.",
+    "example": "Every player on the team is talented, therefore the team is talented.",
+    "structure": "All parts P of whole W have property X. Therefore W has property X."
+  },
+  {
+    "name": "Division",
+    "category": "Ambiguity",
+    "description": "Inferring that parts must have a property because the whole has that property. The reverse of the composition fallacy.",
+    "example": "The company is profitable, so each department must be profitable.",
+    "structure": "Whole W has property X. Therefore each part P of W has property X."
+  },
+  {
+    "name": "Appeal to Tradition",
+    "category": "Relevance",
+    "description": "Arguing that something is good or correct because it has always been done that way. Historical practice does not establish current validity.",
+    "example": "We should keep this policy because it's the way we've always done things.",
+    "structure": "Practice P has always been done. Therefore P is correct or should be continued."
+  },
+  {
+    "name": "Appeal to Nature",
+    "category": "Relevance",
+    "description": "Claiming that something is good because it is natural, or bad because it is unnatural. The natural-artificial distinction does not map onto good-bad.",
+    "example": "Herbal remedies are better than pharmaceuticals because they're natural.",
+    "structure": "X is natural. Natural things are good. Therefore X is good."
+  },
+  {
+    "name": "Genetic Fallacy",
+    "category": "Relevance",
+    "description": "Evaluating a claim based on its origin rather than its merits. The source of an argument is irrelevant to its logical validity.",
+    "example": "That idea came from a Nazi scientist, so it must be wrong.",
+    "structure": "Claim C originated from source S. S has property P (e.g., bad). Therefore C is false."
+  },
+  {
+    "name": "Loaded Question",
+    "category": "Presumption",
+    "description": "Asking a question that contains a hidden assumption the respondent is forced to accept by answering. The question presupposes what it purports to ask.",
+    "example": "Have you stopped cheating on your taxes?",
+    "structure": "Question Q presupposes assumption A. Answering Q in any way accepts A."
+  },
+  {
+    "name": "Correlation-Causation Fallacy",
+    "category": "Causal",
+    "description": "Concluding that one thing causes another based solely on correlation. Two variables can correlate for many reasons: coincidence, common cause, or reverse causation.",
+    "example": "Ice cream sales and drowning rates both rise in summer, so ice cream causes drowning.",
+    "structure": "A and B are correlated. Therefore A causes B."
+  },
+  {
+    "name": "Tu Quoque",
+    "category": "Relevance",
+    "description": "Deflecting a criticism by pointing out the critic's own inconsistency. Also known as appeal to hypocrisy. The critic's behavior is irrelevant to the validity of the criticism.",
+    "example": "You tell me to exercise more, but you don't exercise either.",
+    "structure": "Person P criticizes X. P also does X. Therefore the criticism is invalid."
+  },
+  {
+    "name": "Appeal to Force",
+    "category": "Relevance",
+    "description": "Using threat of harm or coercion to make someone accept a conclusion, rather than providing a logical argument. Argumentum ad baculum.",
+    "example": "You'd better agree with my position, or you'll lose your job.",
+    "structure": "Accept C or face consequence H. Therefore C is true."
+  },
+  {
+    "name": "Bandwagon Fallacy",
+    "category": "Relevance",
+    "description": "A variant of appeal to popularity. Arguing that one should do or believe something because everyone else is doing or believing it.",
+    "example": "Everyone is investing in this stock right now — you should too.",
+    "structure": "Everyone does/believes X. Therefore you should do/believe X."
+  },
+  {
+    "name": "Middle Ground Fallacy",
+    "category": "Presumption",
+    "description": "Assuming that a compromise between two extremes must be correct. Also called argument to moderation or false balance. The correct position may be extreme.",
+    "example": "One side says vaccines are safe, another says they're dangerous, so the truth must be somewhere in between.",
+    "structure": "Position A and position B are extremes. Therefore the midpoint M is correct."
+  },
+  {
+    "name": "Cherry Picking",
+    "category": "Inductive",
+    "description": "Selecting only the evidence that supports a conclusion while ignoring contradictory evidence. Also called confirmation bias in argument form.",
+    "example": "Studies show X works! (Ignoring the majority of studies showing it doesn't.)",
+    "structure": "Evidence E1, E2 support C. Evidence E3, E4, E5 contradict C but are omitted. Therefore C."
+  },
+  {
+    "name": "Ecological Fallacy",
+    "category": "Inductive",
+    "description": "Making inferences about individuals based on aggregate data for the group they belong to.",
+    "example": "Country X has a high average income, so citizen Y must be wealthy.",
+    "structure": "Group G has aggregate property P. Individual I is in G. Therefore I has property P."
+  },
+  {
+    "name": "Gambler's Fallacy",
+    "category": "Inductive",
+    "description": "Believing that past random events affect the probability of future independent events. Independent probabilities do not accumulate.",
+    "example": "The coin has landed heads ten times in a row, so tails is now more likely.",
+    "structure": "Independent event A has occurred N times. Therefore the probability of not-A on the next trial is increased."
+  },
+  {
+    "name": "Sunk Cost Fallacy",
+    "category": "Relevance",
+    "description": "Continuing a course of action because of previously invested resources (time, money, effort) that cannot be recovered, rather than evaluating future prospects.",
+    "example": "We've invested too much in this project to abandon it now.",
+    "structure": "Resources R have already been spent on X. Therefore X should be continued."
+  },
+  {
+    "name": "Affirming the Consequent",
+    "category": "Formal",
+    "description": "Concluding the antecedent is true because the consequent is true. An invalid form of modus ponens. If P then Q; Q; therefore P — is formally invalid.",
+    "example": "If it rains, the ground is wet. The ground is wet. Therefore it rained.",
+    "structure": "If P then Q. Q is true. Therefore P is true. (Invalid — Q may have other causes.)"
+  },
+  {
+    "name": "Denying the Antecedent",
+    "category": "Formal",
+    "description": "Concluding the consequent is false because the antecedent is false. An invalid formal argument form.",
+    "example": "If you study, you'll pass. You didn't study. Therefore you won't pass.",
+    "structure": "If P then Q. Not-P. Therefore not-Q. (Invalid — Q may be true for other reasons.)"
+  },
+  {
+    "name": "Nirvana Fallacy",
+    "category": "Presumption",
+    "description": "Comparing real-world situations to idealized, perfect alternatives, and rejecting solutions because they fall short of perfection.",
+    "example": "There's no point in trying to reduce pollution unless we can eliminate it entirely.",
+    "structure": "Solution S does not achieve ideal I perfectly. Therefore S should be rejected."
+  },
+  {
+    "name": "Anecdotal Evidence",
+    "category": "Inductive",
+    "description": "Using personal experience or isolated examples as evidence for a general claim, ignoring statistical evidence or broader patterns.",
+    "example": "My grandfather smoked all his life and lived to 95, so smoking can't be that bad.",
+    "structure": "Personal case C has property P. Therefore the general claim about P holds."
+  },
+  {
+    "name": "Moving the Goalposts",
+    "category": "Presumption",
+    "description": "Changing the criteria for a claim after the original criteria have been satisfied, in order to avoid conceding the point.",
+    "example": "Show me one study proving X. (One is shown.) Show me five peer-reviewed studies. (Five are shown.) Show me a meta-analysis.",
+    "structure": "Criterion C1 is set. C1 is met. Criterion C2 is substituted. Repeat."
+  },
+  {
+    "name": "Burden of Proof Shifting",
+    "category": "Presumption",
+    "description": "Incorrectly claiming that the burden of proof lies with those who deny a claim rather than those who assert it. The burden lies with the person making the positive claim.",
+    "example": "Prove that God doesn't exist.",
+    "structure": "Claim C is asserted. Burden of proof placed on those denying C rather than those asserting it."
+  },
+  {
+    "name": "Appeal to Pity",
+    "category": "Relevance",
+    "description": "Attempting to persuade by evoking pity rather than providing evidence. Argumentum ad misericordiam.",
+    "example": "You should accept my late homework — I've been having a terrible month.",
+    "structure": "Person P is in unfortunate situation S. Therefore claim C by P should be accepted."
+  },
+  {
+    "name": "Overgeneralization",
+    "category": "Inductive",
+    "description": "Drawing a sweeping conclusion from insufficient evidence, applying it too broadly. Similar to hasty generalization but applies to the scope of conclusions.",
+    "example": "Women are better at multitasking than men.",
+    "structure": "Evidence E observed in context X. Conclusion C drawn for all contexts."
+  },
+  {
+    "name": "Special Pleading",
+    "category": "Presumption",
+    "description": "Applying a general rule or standard to others but claiming an exemption for oneself or a favored case without adequate justification.",
+    "example": "Lying is wrong, but it's okay when I do it to protect feelings.",
+    "structure": "Rule R applies to all cases. Exception claimed for case C without principled justification."
+  },
+  {
+    "name": "Argument from Silence",
+    "category": "Presumption",
+    "description": "Inferring something from the absence of evidence or statement about it. Silence about a topic does not constitute evidence for any claim about it.",
+    "example": "The ancient texts never mention X, so X never existed.",
+    "structure": "Source S does not mention claim C. Therefore C is false."
+  },
+  {
+    "name": "Availability Heuristic",
+    "category": "Inductive",
+    "description": "Overestimating the probability of events that are easily recalled or vivid, rather than based on statistical frequency.",
+    "example": "Plane crashes are frequently in the news, so flying must be more dangerous than driving.",
+    "structure": "Examples of X are easily recalled. Therefore X is common or probable."
+  },
+  {
+    "name": "Modus Tollens (Valid)",
+    "category": "Valid Argument Form",
+    "description": "A valid deductive argument form: if P implies Q, and Q is false, then P must be false. This is a legitimate form of reasoning, not a fallacy.",
+    "example": "If it rains, the ground is wet. The ground is not wet. Therefore it did not rain.",
+    "structure": "If P then Q. Not-Q. Therefore not-P. (Valid)"
+  },
+  {
+    "name": "Modus Ponens (Valid)",
+    "category": "Valid Argument Form",
+    "description": "A valid deductive argument form: if P implies Q, and P is true, then Q must be true. This is a legitimate form of reasoning.",
+    "example": "If you study, you'll pass. You studied. Therefore you'll pass.",
+    "structure": "If P then Q. P is true. Therefore Q is true. (Valid)"
+  },
+  {
+    "name": "Reductio ad Absurdum (Valid)",
+    "category": "Valid Argument Form",
+    "description": "A valid form of argumentation that refutes a claim by showing that it leads to an absurd or contradictory conclusion.",
+    "example": "If infinite regress were acceptable, we could never explain anything. That's absurd. So infinite regress is not acceptable.",
+    "structure": "Assume C. C implies absurdity A. Therefore not-C."
+  },
+  {
+    "name": "Amphiboly",
+    "category": "Ambiguity",
+    "description": "Exploiting grammatical ambiguity in a statement to draw a misleading conclusion. The ambiguity is structural rather than in a single word.",
+    "example": "The professor told the student she was wrong. (Who is wrong?)",
+    "structure": "Statement S is grammatically ambiguous between meaning M1 and M2. Argument proceeds as if S has both meanings."
+  },
+  {
+    "name": "Accent Fallacy",
+    "category": "Ambiguity",
+    "description": "Changing the meaning of a statement by emphasizing different words, or misrepresenting a position by taking it out of context.",
+    "example": "We should not speak ill of our friends. (Emphasizing 'friends' implies we should speak ill of others.)",
+    "structure": "Statement S with emphasis E1 has meaning M1. Interpreting S with different emphasis E2 to derive M2."
+  },
+  {
+    "name": "Existential Fallacy",
+    "category": "Formal",
+    "description": "In classical logic, drawing a conclusion about existing things from premises that only involve general statements about categories, without confirming any members exist.",
+    "example": "All unicorns have horns. Some horned animals are horses. Therefore some unicorns are horses.",
+    "structure": "Universal premises about category C assumed to have existing members."
+  },
+  {
+    "name": "Irrelevant Conclusion",
+    "category": "Relevance",
+    "description": "An argument that purports to prove one thing but actually proves something else. Also called ignoratio elenchi — missing the point.",
+    "example": "We should be lenient with this criminal — crime is a serious problem in society.",
+    "structure": "Premises P support conclusion C. Conclusion C' (different from C) is presented as if following from P."
+  },
+  {
+    "name": "Texas Sharpshooter",
+    "category": "Inductive",
+    "description": "Choosing a cluster of data that fits a pattern after the fact, ignoring data that doesn't fit. Named after someone who shoots at a wall then draws a target around the bullet holes.",
+    "example": "These ten historical events all happened in years divisible by seven — there must be a pattern.",
+    "structure": "Data D is examined. Pattern P is found in subset S. Conclusion drawn that P is meaningful, ignoring data outside S."
+  },
+  {
+    "name": "Appeal to Consequences",
+    "category": "Relevance",
+    "description": "Arguing that a claim is true or false based on whether believing it has good or bad consequences, rather than on evidence.",
+    "example": "If evolution is true, there is no basis for morality — so evolution must be false.",
+    "structure": "If C is true, bad consequence B follows. Therefore C is false."
+  }
+]

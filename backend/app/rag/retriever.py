@@ -1,9 +1,47 @@
-# Phase 2 — ChromaDB retrieval wrapper.
-# Stub for Phase 1.
+"""
+Phase 2 — ChromaDB retrieval wrapper.
 
-from langchain_core.documents import Document
+Exposes a single function: retrieve(query, k) -> list[Document]
+"""
+
+import logging
+from functools import lru_cache
+from pathlib import Path
+
+from langchain.schema import Document
+from langchain_chroma import Chroma
+from langchain_google_genai import GoogleGenerativeAIEmbeddings
+
+logger = logging.getLogger(__name__)
+
+BACKEND_DIR = Path(__file__).parent.parent.parent
+CHROMA_DIR = BACKEND_DIR / "chroma_db"
+COLLECTION_NAME = "dialectica_corpus"
+
+
+@lru_cache(maxsize=1)
+def _get_vectorstore() -> Chroma:
+    if not CHROMA_DIR.exists():
+        raise RuntimeError(
+            "ChromaDB not found. Run: python -m app.rag.build_index"
+        )
+    embeddings = GoogleGenerativeAIEmbeddings(model="models/gemini-embedding-001")
+    return Chroma(
+        collection_name=COLLECTION_NAME,
+        embedding_function=embeddings,
+        persist_directory=str(CHROMA_DIR),
+    )
 
 
 def retrieve(query: str, k: int = 3) -> list[Document]:
-    """Return top-k documents from the ChromaDB corpus. Wired in Phase 2."""
-    raise NotImplementedError("RAG retriever not yet initialized. Run Phase 2.")
+    """
+    Return the top-k most relevant documents for the given query.
+
+    Each Document has:
+      - page_content: the text chunk
+      - metadata: {"source": str, "type": str, ...}
+    """
+    vectorstore = _get_vectorstore()
+    results = vectorstore.similarity_search(query, k=k)
+    logger.debug("Retrieved %d docs for query: %s", len(results), query[:80])
+    return results

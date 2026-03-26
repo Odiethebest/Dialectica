@@ -1,0 +1,126 @@
+EPISTEMOLOGY: KNOWLEDGE, JUSTIFICATION, AND BELIEF
+Source: Curated reference text for Dialectica RAG corpus
+
+=== WHAT IS EPISTEMOLOGY ===
+
+Epistemology is the branch of philosophy concerned with the nature, sources, scope, and limits of knowledge. Central questions include: What is knowledge? How is knowledge acquired? What are the limits of what we can know? How do we justify our beliefs?
+
+Epistemology is directly relevant to argumentation because every argument makes implicit claims about what can be known and how. Understanding the epistemic assumptions underlying a claim is often the key to challenging or defending it.
+
+=== THE TRADITIONAL ANALYSIS OF KNOWLEDGE ===
+
+The classical definition: Knowledge is justified true belief (JTB).
+
+For a person S to know that P:
+1. P is true (truth condition)
+2. S believes P (belief condition)
+3. S is justified in believing P (justification condition)
+
+The Gettier problem (1963): Edmund Gettier showed that justified true belief is not sufficient for knowledge. Counterexamples demonstrate cases where a person has justified true belief but clearly does not know. For example: A person believes their clock shows the correct time. The clock stopped 12 hours ago and happens to show the right time. The belief is justified, true, but intuitively not knowledge.
+
+Post-Gettier responses have proposed additional conditions:
+- Reliability: The belief was produced by a reliable cognitive process (reliabilism)
+- Causal connection: The belief is appropriately caused by the fact that makes it true
+- Sensitivity: If P were false, S would not believe P (safety/sensitivity conditions)
+- No false lemmas: The inference to P does not pass through any false intermediate beliefs
+
+=== SOURCES OF KNOWLEDGE ===
+
+Empirical knowledge: Derived from sensory experience. Contingent truths about the world are known a posteriori — after experience.
+
+A priori knowledge: Known independently of sensory experience, through reason alone. Examples: mathematical truths, logical tautologies, and analytic truths (truths true by definition).
+
+Testimony: A significant proportion of what we know comes from other people's reports. We cannot verify everything firsthand. The epistemology of testimony concerns when and how much to trust others.
+
+Memory: Knowledge preserved from past experience. Memory is fallible and reconstructive rather than reproductive.
+
+Intuition: Strong prereflective judgments that serve as evidence in philosophy and everyday reasoning. The status of intuitions as evidence is contested.
+
+=== THEORIES OF JUSTIFICATION ===
+
+Foundationalism: Beliefs are justified by being either:
+(a) Basic beliefs: Self-justifying or not requiring justification from other beliefs (e.g., clear perceptual experiences, self-evident truths), or
+(b) Derived beliefs: Justified by inferential relationships to basic beliefs.
+
+Coherentism: A belief is justified to the extent that it coheres with a system of other beliefs. No belief is self-justifying; instead, the system as a whole is mutually supporting. Critics note that a coherent system can still be false.
+
+Infinitism: The regress of justification continues infinitely. Each belief is justified by another belief, without a terminating foundation. Criticized as psychologically impossible.
+
+Contextualism: The standards for justification vary with context. What counts as sufficient justification depends on the practical stakes, salient alternatives, and conversational context.
+
+=== SKEPTICISM ===
+
+Skepticism is the view that knowledge (or justified belief) in some domain is impossible or extremely difficult to achieve.
+
+Cartesian skepticism: Even our most basic beliefs about the external world might be false if we are systematically deceived (e.g., by an evil demon, or by being a brain in a vat).
+
+Responses to skepticism:
+- Dogmatism: Simply deny that skeptical scenarios give us reason to doubt
+- Contextualism: Skeptical standards are inappropriately high; lower ordinary standards suffice
+- Relevant alternatives: We only need to rule out relevant alternatives, not all logically possible alternatives
+- Pragmatic responses: Doubt requires reasons; without specific reasons to doubt, the default is belief
+
+=== FALLIBILISM ===
+
+Fallibilism is the view that knowledge does not require certainty. A person can know P even if their evidence for P does not guarantee P and it is possible they are wrong.
+
+This is the dominant epistemological position. It allows for a middle ground between skepticism (we know almost nothing because we lack certainty) and dogmatism (our current beliefs are immune to revision).
+
+Implications for argumentation: Even strong arguments do not typically establish conclusions with certainty. Acknowledging the possibility of error while maintaining conviction is epistemically responsible.
+
+=== SOCIAL EPISTEMOLOGY ===
+
+Social epistemology studies the social dimensions of knowledge acquisition and justification.
+
+Testimony and trust: How should we decide who to believe? Factors include expertise, track record, institutional affiliation, incentives, and consensus among peers.
+
+Expert disagreement: When experts disagree, how should non-experts form beliefs? Options:
+- Steadfast view: Maintain your belief if you have better evidence
+- Conciliatory view: Move toward the midpoint between your credences
+- Deferential view: Defer to the most credentialed experts
+
+Epistemic injustice (Miranda Fricker): Unfair distribution of epistemic resources.
+- Testimonial injustice: Giving someone less credibility than they deserve due to prejudice
+- Hermeneutical injustice: Gaps in collective interpretive resources that harm understanding of one's experience
+
+=== EPISTEMOLOGY OF ARGUMENT ===
+
+When evaluating arguments and claims:
+
+1. Distinguish types of claims:
+   - Empirical claims: Require evidence; can in principle be tested
+   - Normative claims: About values, ought, and should; require different kinds of justification
+   - Conceptual claims: About the meaning or nature of concepts
+   - Mathematical/logical claims: True a priori, validated by proof
+
+2. Proportionality: Belief should be proportional to evidence. Overconfidence and underconfidence are both epistemic failures.
+
+3. Reflective equilibrium (Rawls): Justification proceeds by moving back and forth between particular judgments and general principles, revising each in light of the other until coherence is achieved.
+
+4. Epistemic virtues: Intellectual humility, open-mindedness, thoroughness, intellectual courage, and honesty are virtues that promote good epistemic practices.
+
+5. Cognitive biases that distort reasoning:
+   - Confirmation bias: Seeking evidence that confirms existing beliefs
+   - Anchoring: Over-relying on the first piece of information encountered
+   - Availability heuristic: Overweighting vivid or easily recalled examples
+   - Dunning-Kruger effect: The incompetent are often unaware of their incompetence
+   - Motivated reasoning: Reasoning toward a desired conclusion
+
+=== UNDERDETERMINATION ===
+
+The thesis of underdetermination holds that evidence is insufficient to uniquely determine which theory we should believe. Multiple incompatible theories may be equally well supported by the available evidence.
+
+Implication for argumentation: When a claim is underdetermined by evidence, additional criteria (parsimony, coherence, explanatory power) must be invoked to adjudicate between competing hypotheses.
+
+=== INFERENCE TO THE BEST EXPLANATION ===
+
+Inference to the best explanation (IBE) — also called abduction — is the form of reasoning in which we infer the hypothesis that best explains the available evidence.
+
+Criteria for "best explanation":
+1. Explanatory power: Explains more of the phenomena
+2. Parsimony (Occam's Razor): Invokes fewer unverified entities or mechanisms
+3. Unification: Explains diverse phenomena under a common principle
+4. Non-ad hoc: Does not introduce assumptions solely to save the hypothesis from refutation
+5. Predictive fertility: Generates novel testable predictions
+
+IBE is the primary inferential engine of science and also of everyday reasoning about what to believe. Recognizing when an argument relies on IBE helps evaluate whether the "best explanation" is genuinely the best available option.

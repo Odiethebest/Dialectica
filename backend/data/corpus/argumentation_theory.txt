@@ -1,0 +1,134 @@
+ARGUMENTATION THEORY: FOUNDATIONS AND STRUCTURES
+Source: Curated reference text for Dialectica RAG corpus
+
+=== WHAT IS AN ARGUMENT ===
+
+An argument is a set of statements in which some statements (the premises) are offered as reasons for accepting another statement (the conclusion). Arguments are used to support claims, justify beliefs, and persuade others through reason rather than force or rhetoric alone.
+
+An argument is distinct from:
+- An explanation: explains why something is the case, not whether it is the case
+- A report: describes what happened without attempting to justify a conclusion
+- An assertion: states a claim without offering supporting reasons
+- A conditional: expresses a hypothetical relationship without committing to the antecedent
+
+=== DEDUCTIVE ARGUMENTS ===
+
+A deductive argument is one in which the premises are intended to guarantee the truth of the conclusion. If the premises are true and the argument is valid, the conclusion must be true.
+
+Validity: A deductive argument is valid if and only if it is impossible for the premises to be true and the conclusion false. Validity is a formal property — it concerns the relationship between premises and conclusion, not the truth of the premises themselves.
+
+Soundness: A deductive argument is sound if and only if it is both valid and has all true premises. Only sound arguments provide conclusive proof of their conclusions.
+
+Key forms of valid deductive reasoning:
+- Modus Ponens: If P then Q; P; therefore Q
+- Modus Tollens: If P then Q; not-Q; therefore not-P
+- Hypothetical Syllogism: If P then Q; if Q then R; therefore if P then R
+- Disjunctive Syllogism: P or Q; not-P; therefore Q
+- Reductio ad Absurdum: Assume P; P leads to contradiction; therefore not-P
+
+=== INDUCTIVE ARGUMENTS ===
+
+An inductive argument is one in which the premises are intended to make the conclusion probable, but not certain. Even if the premises are all true, the conclusion might be false.
+
+Strength: An inductive argument is strong if, assuming the premises are true, the conclusion is probably true. An inductive argument is weak if the premises provide little support for the conclusion.
+
+Cogency: An inductive argument is cogent if and only if it is both strong and has all true premises.
+
+Types of inductive reasoning:
+- Enumerative induction: Inferring a general principle from observed cases
+- Statistical syllogism: Applying a statistical generalization to a particular case
+- Argument by analogy: Inferring that similar things will have similar properties
+- Inference to the best explanation (abduction): Concluding that the hypothesis that best explains the evidence is most likely true
+- Causal inference: Inferring causal relationships from patterns of association
+
+=== ABDUCTIVE REASONING ===
+
+Abductive reasoning (inference to the best explanation) proceeds from a set of observations to the hypothesis that would best explain those observations. Unlike deduction, the conclusion goes beyond what is strictly entailed by the premises. Unlike induction, it focuses on explanatory power rather than statistical frequency.
+
+Criteria for evaluating explanations:
+- Explanatory power: How much of the evidence does the hypothesis explain?
+- Parsimony: Does the hypothesis posit fewer unexplained entities or processes?
+- Fit with background knowledge: Is the hypothesis consistent with what we already know?
+- Testability: Does the hypothesis make predictions that can be tested?
+- Unification: Does the hypothesis explain diverse phenomena under a single principle?
+
+=== ARGUMENT STRUCTURE ===
+
+The Toulmin model of argument identifies six components:
+1. Claim: The conclusion to be established
+2. Data (grounds): The evidence or facts supporting the claim
+3. Warrant: The general principle that licenses the step from data to claim
+4. Backing: Support for the warrant itself
+5. Qualifier: The degree of certainty with which the claim is made
+6. Rebuttal: Exceptional conditions that would override the claim
+
+This model is particularly useful for analyzing informal arguments in natural language, where warrants are often implicit and claims are qualified.
+
+=== FALLACIES: OVERVIEW ===
+
+A fallacy is an argument that appears to be valid or persuasive but contains a logical error. Fallacies are broadly divided into:
+
+Formal fallacies: Errors in the logical form of an argument. The conclusion does not follow from the premises regardless of their content. Examples: affirming the consequent, denying the antecedent.
+
+Informal fallacies: Errors in the content, context, or use of an argument rather than its logical form. Divided into:
+- Fallacies of relevance: Premises are logically irrelevant to the conclusion
+- Fallacies of presumption: Arguments rely on hidden or unjustified assumptions
+- Fallacies of ambiguity: Arguments exploit vagueness or ambiguity in language
+- Fallacies of induction: Faulty generalization or causal inference
+
+=== ARGUMENT EVALUATION ===
+
+When evaluating an argument, consider:
+
+1. Identify the conclusion: What is the arguer trying to establish?
+2. Identify the premises: What reasons are offered in support?
+3. Check the logical structure: Does the conclusion follow from the premises?
+4. Evaluate premise truth: Are the premises actually true?
+5. Check for hidden assumptions: What unstated premises does the argument require?
+6. Consider counterarguments: What is the strongest objection to this argument?
+7. Assess the burden of proof: Who is making the positive claim, and have they met the evidential standard?
+
+=== BURDEN OF PROOF ===
+
+The burden of proof lies with the person making a positive claim. The null hypothesis — the default position in the absence of evidence — is that the claim is not established. The arguer must provide evidence and reasoning that shifts rational belief.
+
+Evidential standards vary by context:
+- Scientific claims: Empirical evidence, reproducibility, peer review
+- Legal contexts: Beyond reasonable doubt (criminal); preponderance of evidence (civil)
+- Everyday claims: Proportional to how extraordinary or counterintuitive the claim is
+- Philosophical claims: Coherence with other well-justified beliefs, explanatory power
+
+Sagan's principle: Extraordinary claims require extraordinary evidence.
+
+=== CHARITABLE INTERPRETATION (THE PRINCIPLE OF CHARITY) ===
+
+When evaluating an argument, one should interpret it in its strongest possible form before criticizing it. This is both epistemically honest (you learn more by engaging with the best version of a position) and rhetorically effective (defeating the weakest version convinces no one).
+
+Steelmanning: Constructing the strongest possible version of an opposing argument, including filling in implicit premises and choosing the most favorable interpretation of ambiguous terms.
+
+Steelmanning serves two functions:
+1. Epistemic: Ensures you have genuinely understood and engaged with the position
+2. Rhetorical: Demonstrates intellectual honesty and increases the persuasiveness of any subsequent critique
+
+=== COUNTERARGUMENT STRATEGIES ===
+
+There are several principled strategies for challenging a claim:
+
+1. Challenge a premise: Show that one of the premises is false or lacks adequate support
+2. Challenge the inference: Show that the conclusion does not follow from the premises even if they were true
+3. Present a counterexample: Provide a case where the principle invoked by the argument fails
+4. Reductio ad absurdum: Show that the argument, if valid, would lead to a conclusion that is obviously false
+5. Challenge the framing: Show that the argument depends on a false dichotomy, misleading framing, or question-begging definition
+6. Provide an alternative explanation: Offer a different causal story that accounts for the evidence equally well or better
+7. Appeal to competing values: Acknowledge the argument's force while arguing that other considerations outweigh it
+
+=== EPISTEMIC HUMILITY IN ARGUMENTATION ===
+
+Good arguers distinguish between:
+- What they know vs. what they believe vs. what they suspect
+- The strength of their evidence vs. the strength of their conviction
+- Arguments that establish a conclusion beyond doubt vs. arguments that merely make it more probable
+
+Degrees of confidence: Claims should be qualified with appropriate hedges. "X is possible," "X is probable," "X is established," and "X is certain" are epistemically different claims that should not be conflated.
+
+Updating on evidence: A rational agent revises beliefs proportionally to new evidence. Resistance to updating is a sign of motivated reasoning rather than strong argument.
