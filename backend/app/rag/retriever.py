@@ -5,6 +5,7 @@ Exposes a single function: retrieve(query, k) -> list[Document]
 """
 
 import logging
+import os
 from functools import lru_cache
 from pathlib import Path
 
@@ -15,7 +16,7 @@ from langchain_openai import OpenAIEmbeddings
 logger = logging.getLogger(__name__)
 
 BACKEND_DIR = Path(__file__).parent.parent.parent
-CHROMA_DIR = BACKEND_DIR / "chroma_db"
+CHROMA_DIR = Path(os.getenv("CHROMA_DB_PATH", str(BACKEND_DIR / "chroma_db")))
 COLLECTION_NAME = "dialectica_corpus"
 
 
