@@ -25,7 +25,11 @@ def _get_vectorstore() -> Chroma:
         raise RuntimeError(
             "ChromaDB not found. Run: python -m app.rag.build_index"
         )
-    embeddings = GoogleGenerativeAIEmbeddings(model="models/gemini-embedding-001")
+    from ..config import settings
+    embeddings = GoogleGenerativeAIEmbeddings(
+        model="models/gemini-embedding-001",
+        google_api_key=settings.google_api_key,
+    )
     return Chroma(
         collection_name=COLLECTION_NAME,
         embedding_function=embeddings,
