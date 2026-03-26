@@ -10,6 +10,7 @@ export default defineConfig({
   server: {
     proxy: {
       '/dialectica': 'http://localhost:8000',
+      '/health': 'http://localhost:8000',
     }
   }
 })

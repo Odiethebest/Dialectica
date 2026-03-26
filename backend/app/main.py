@@ -2,9 +2,12 @@ import json
 import logging
 import uuid
 from datetime import datetime, timedelta, timezone
+from pathlib import Path
 
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
 from langchain_core.messages import HumanMessage, SystemMessage
 from langchain_openai import ChatOpenAI
 from pydantic import BaseModel
@@ -393,3 +396,15 @@ async def suggest_perspectives(body: SuggestPerspectivesRequest):
     except Exception as e:
         logger.exception("Error in /dialectica/suggest-perspectives")
         return {"error": str(e)}
+
+
+# ── Frontend static file hosting ─────────────────────────────────────────────
+
+FRONTEND_DIST = Path(__file__).parent.parent.parent / "frontend" / "dist"
+
+if FRONTEND_DIST.exists():
+    app.mount("/assets", StaticFiles(directory=FRONTEND_DIST / "assets"), name="assets")
+
+    @app.get("/{full_path:path}")
+    async def serve_frontend(full_path: str):
+        return FileResponse(FRONTEND_DIST / "index.html")
