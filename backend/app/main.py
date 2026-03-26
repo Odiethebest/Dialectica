@@ -424,8 +424,16 @@ async def suggest_perspectives(body: SuggestPerspectivesRequest):
 FRONTEND_DIST = Path(__file__).parent.parent.parent / "frontend" / "dist"
 
 if FRONTEND_DIST.exists():
+    # Serve static assets (JS, CSS)
     app.mount("/assets", StaticFiles(directory=FRONTEND_DIST / "assets"), name="assets")
 
+    # Serve root-level static files (favicon.svg, etc.)
+    @app.get("/favicon.svg")
+    async def favicon():
+        return FileResponse(FRONTEND_DIST / "favicon.svg", media_type="image/svg+xml")
+
+    # Serve index.html for all other non-API routes (SPA fallback)
     @app.get("/{full_path:path}")
     async def serve_frontend(full_path: str):
-        return FileResponse(FRONTEND_DIST / "index.html")
+        index = FRONTEND_DIST / "index.html"
+        return FileResponse(index)
