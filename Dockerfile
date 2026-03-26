@@ -16,6 +16,7 @@ COPY frontend/dist ./frontend/dist
 
 ENV PYTHONPATH=/app
 ENV CHROMA_DB_PATH=/data/chroma_db
+ENV BUILD_VERSION=2
 
 EXPOSE 8000
 
