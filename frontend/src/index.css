@@ -106,6 +106,23 @@ body {
   letter-spacing: 0;
 }
 
+.d-navbar-left {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.d-navbar-byline {
+  font-family: var(--d-serif);
+  font-size: 9px;
+  font-style: italic;
+  letter-spacing: 0.12em;
+  color: var(--d-gold2);
+  opacity: 0.8;
+  line-height: 1;
+  padding-left: 1px;
+}
+
 .d-navbar-new-btn {
   font-family: var(--d-sans);
   font-size: 12px;
@@ -119,6 +136,36 @@ body {
 }
 
 .d-navbar-new-btn:hover { color: var(--d-gold3); }
+
+/* ── Footer ──────────────────────────────────────────────────────────────────── */
+
+.d-footer {
+  margin-top: 56px;
+  padding-bottom: 40px;
+}
+
+.d-footer-rule {
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    #A8841E 30%,
+    #C4983A 50%,
+    #A8841E 70%,
+    transparent 100%
+  );
+  margin-bottom: 18px;
+}
+
+.d-footer-text {
+  font-family: var(--d-sans);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  color: var(--d-muted);
+  text-align: center;
+  margin: 0;
+  user-select: none;
+}
 
 /* ── Gold rule (signature detail, below navbar) ───────────────────────────── */
 
@@ -929,6 +976,7 @@ body {
 
   .d-navbar { padding: 0 20px; height: 48px; }
   .d-navbar-wordmark { font-size: 10px; letter-spacing: 0.3em; }
+  .d-navbar-byline { letter-spacing: 0.06em; }
 
   .idle-container,
   .active-container {

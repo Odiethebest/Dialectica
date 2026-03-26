@@ -7,6 +7,19 @@ import ClaimInput from './components/ClaimInput'
 import PipelineStatus from './components/PipelineStatus'
 import DialogueThread from './components/DialogueThread'
 
+function Footer({ lang }) {
+  return (
+    <footer className="d-footer">
+      <div className="d-footer-rule" />
+      <p className="d-footer-text">
+        {lang === 'zh'
+          ? `© ${new Date().getFullYear()} Odie Yang · 保留所有权利`
+          : `© ${new Date().getFullYear()} Odie Yang · All rights reserved`}
+      </p>
+    </footer>
+  )
+}
+
 export default function App() {
   const {
     mode, currentNode,
@@ -98,13 +111,18 @@ export default function App() {
   return (
     <div className={`dialectica-page lang-${lang}`}>
       <nav className="d-navbar">
-        <span className="d-navbar-wordmark">Dialectica</span>
+        <div className="d-navbar-left">
+          <span className="d-navbar-wordmark">Dialectica</span>
+          <span className="d-navbar-byline">
+            {lang === 'zh' ? '作者：Odie Yang' : 'by Odie Yang'}
+          </span>
+        </div>
         <div style={{ display: 'flex', alignItems: 'center' }}>
           <button
             className="d-lang-btn"
             onClick={() => switchLang(lang === 'en' ? 'zh' : 'en')}
           >
-            {lang === 'en' ? '中文' : 'EN'}
+            {lang === 'en' ? 'ZH' : 'EN'}
           </button>
           {mode !== 'idle' && (
             <button className="d-navbar-new-btn" onClick={handleReset}>
@@ -122,13 +140,16 @@ export default function App() {
       )}
 
       {mode === 'idle' ? (
-        <ClaimInput
-          claim={claim}
-          onChange={setClaim}
-          onSubmit={handleStart}
-          onAutoSubmit={handleAutoSubmit}
-          lang={lang}
-        />
+        <>
+          <ClaimInput
+            claim={claim}
+            onChange={setClaim}
+            onSubmit={handleStart}
+            onAutoSubmit={handleAutoSubmit}
+            lang={lang}
+          />
+          <Footer lang={lang} />
+        </>
       ) : (
         <div className="active-container">
           <PipelineStatus
@@ -152,6 +173,7 @@ export default function App() {
             onSubmitResponses={submitResponses}
             lang={lang}
           />
+          <Footer lang={lang} />
         </div>
       )}
     </div>
