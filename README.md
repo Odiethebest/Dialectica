@@ -150,13 +150,13 @@ dialectica/
 │
 ├── frontend/
 │   └── src/
-│       ├── App.jsx              # Page root + session state + URL deep-link
+│       ├── App.jsx              # Page root + session state + lang + URL deep-link
 │       ├── components/
 │       │   ├── ClaimInput.jsx       # Idle mode: textarea, chips, categories, history, mic
 │       │   ├── PipelineStatus.jsx   # 5-node progress indicator
 │       │   ├── DialogueThread.jsx   # Scrollable block layout
 │       │   ├── ParchmentBlock.jsx   # Torn-paper SVG wrapper for all blocks
-│       │   ├── ReadMoreText.jsx     # Collapsible long-text component
+│       │   ├── ReadMoreText.jsx     # Collapsible long-text (160/80 char threshold)
 │       │   ├── parchmentPath.js     # SVG path generator (irregular torn edges)
 │       │   └── blocks/
 │       │       ├── ClaimBlock.jsx
@@ -168,12 +168,16 @@ dialectica/
 │       │       └── SynthesisBlock.jsx
 │       ├── hooks/
 │       │   ├── useDialectica.js     # SSE state management
-│       │   └── useSpeechInput.js    # Web Speech API hook
+│       │   └── useSpeechInput.js    # Web Speech API hook (lang-aware)
+│       ├── i18n/
+│       │   ├── strings.js           # EN/ZH string maps + t(lang, key) helper
+│       │   └── claims.zh.js         # 24 Chinese example claims + category metadata
 │       ├── utils/
 │       │   ├── readSSE.js           # Shared SSE async generator
-│       │   └── history.js           # localStorage claim history
+│       │   ├── history.js           # localStorage claim history
+│       │   └── language.js          # detectInitialLang() + saveLang()
 │       └── data/
-│           └── randomClaims.js      # 24 example claims + category metadata
+│           └── randomClaims.js      # 24 EN example claims + category metadata
 │
 └── Docs/
     ├── ROADMAP.md               # Chronological build log
@@ -181,7 +185,11 @@ dialectica/
     ├── 02-Scroll.md             # Parchment SVG UI spec
     ├── 03-output-style-guide.md # LLM output quality spec
     ├── 04-Zero-Friction.md      # Zero-friction entry spec
-    └── 05-autoresponse.md       # Three-tier auto-response spec
+    ├── 05-autoresponse.md       # Three-tier auto-response spec
+    ├── 06-Chinese.md            # EN/ZH bilingual spec
+    ├── 07-Brand-Copyright.md    # Navbar byline + footer spec
+    ├── design-backend.md        # Backend design thinking + decisions
+    └── design-frontend.md       # Frontend design thinking + decisions
 ```
 
 ---

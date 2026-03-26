@@ -205,6 +205,58 @@ result = await structured_llm.ainvoke(messages)
 
 ---
 
+## Phase 11 — EN/ZH Bilingual Support
+**Spec reference:** [`06-Chinese.md`](06-Chinese.md)
+
+**What was built:**
+
+*Infrastructure:*
+- `utils/language.js`: `detectInitialLang()` — checks localStorage → `navigator.language` → defaults `en`; `saveLang(lang)` persists to localStorage
+- `i18n/strings.js`: complete EN/ZH string maps for all UI text; `t(lang, key)` helper with EN fallback
+- `i18n/claims.zh.js`: 24 Chinese example claims across 5 categories, matching EN categories exactly (same icons and hex colors: `⚖ ⚙ ◎ ∞ ◈`)
+
+*Frontend:*
+- `lang` state in `App.jsx`: `useState(() => detectInitialLang())` — persists across sessions
+- Language toggle button (navbar right): `{lang === 'en' ? 'ZH' : 'EN'}`
+- URL deep-link: `?lang=zh` param read on mount, saved to localStorage
+- Root `<div>` carries `lang-${lang}` class for CSS-level overrides
+- `.lang-zh` CSS overrides: Noto Serif SC / Noto Sans SC fonts (Google Fonts), CJK-optimized font-size and line-height, `font-style: normal` (disables italic for ZH headings), `font-feature-settings: "chws" 1`
+- All 6 block components, `PipelineStatus`, `ResponseForm`, `ReadMoreText` accept and use `lang` prop
+- `ReadMoreText` threshold: 160 chars EN / 80 chars ZH
+- `useSpeechInput` lang-aware: `zh-CN` / `en-US` explicitly instead of navigator auto-detect
+
+*Backend:*
+- `lang: str` field added to `DialecticaState`
+- `get_prompt(node, lang) -> (system, user)` selector added to `prompts.py`
+- Full Chinese system+user prompts written for all 8 node types (understand / steelman / attack / interrogate / synthesize / auto_respond / auto_respond_one / suggest_perspectives)
+- All 5 node functions updated to call `get_prompt(name, lang)` instead of importing constants directly
+- All 3 auto-respond endpoints updated to pass `lang` through and use Chinese stance instruction strings for `zh` mode
+
+---
+
+## Phase 12 — Brand & Copyright
+**Spec reference:** [`07-Brand-Copyright.md`](07-Brand-Copyright.md)
+
+**What was built:**
+- **Navbar byline** (brand signal, always visible): `<span className="d-navbar-byline">` rendered directly below the wordmark in `.d-navbar-left` (column flex); 9px italic Georgia, gold2 color, `opacity: 0.8`; ZH variant: `作者：Odie Yang`; mobile: `letter-spacing` reduced from `0.12em` to `0.06em`
+- **Footer** (legal signal, end of page): `Footer` component defined in `App.jsx`; gold gradient rule (`d-footer-rule`) + centered copyright text (`d-footer-text`); `new Date().getFullYear()` — never hardcoded; ZH variant: `保留所有权利`; rendered at bottom of both idle and active views
+- Two separate placements — intentionally never combined
+
+---
+
+## Phase 13 — Mobile Category Bar
+**Commit:** `0c94a6b` — *fix(mobile): one-line category bar — hide icons, full labels on all sizes*
+
+**What was built:**
+- Root cause: 5 category icons (~20px each) + labels pushed total bar width past 390px, wrapping to two lines
+- Fix: `flex-wrap: nowrap` on `.d-category-bar`; hide `.d-cat-icon` at ≤480px; tighter padding (`5px 10px`) and font-size (`12px`) on mobile
+- Label text: full names shown at all breakpoints (abbreviated `Tech`/`Phil.` tried and reverted — icons hidden alone is sufficient)
+- EN labels use `data-label-full` data attribute + CSS `::before { content: attr(data-label-full) }` — hook available for future per-label overrides without JS
+- ZH labels render text content directly (2-char names are naturally compact)
+- Button style refreshed: italic Georgia serif, `#7A4A30` text, `#EDE4D8` border — matches the scholarly tone; active state uses `--cat-color` CSS variable per category
+
+---
+
 ## Current State
 
 All phases complete and deployed. The full pipeline is live at `odieyang.com/dialectica`.
@@ -223,6 +275,9 @@ All phases complete and deployed. The full pipeline is live at `odieyang.com/dia
 | Zero-friction entry (6 features) | ✅ |
 | Three-tier auto-response system | ✅ |
 | Synthesize ChatPromptTemplate bug fix | ✅ |
+| EN/ZH bilingual support | ✅ |
+| Navbar byline + page footer | ✅ |
+| Mobile category bar (one-line) | ✅ |
 
 ### Spec docs
 | File | Phase implemented |
@@ -232,3 +287,7 @@ All phases complete and deployed. The full pipeline is live at `odieyang.com/dia
 | [`03-output-style-guide.md`](03-output-style-guide.md) | Phase 7 — Output quality |
 | [`04-Zero-Friction.md`](04-Zero-Friction.md) | Phase 8 — Zero-friction entry |
 | [`05-autoresponse.md`](05-autoresponse.md) | Phase 9 — Auto-response |
+| [`06-Chinese.md`](06-Chinese.md) | Phase 11 — EN/ZH bilingual |
+| [`07-Brand-Copyright.md`](07-Brand-Copyright.md) | Phase 12 — Brand & copyright |
+| [`design-backend.md`](design-backend.md) | Reference — backend design thinking |
+| [`design-frontend.md`](design-frontend.md) | Reference — frontend design thinking |
