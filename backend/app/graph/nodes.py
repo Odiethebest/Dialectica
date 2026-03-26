@@ -47,9 +47,18 @@ class InterrogateOutput(BaseModel):
     socratic_questions: list[str] = Field(description="Exactly 3 Socratic questions")
 
 
+class ArgumentMap(BaseModel):
+    core_claim: str = Field(description="The original core claim")
+    refined_claim: str = Field(description="Improved, more defensible version of the claim")
+    warrants: list[str] = Field(description="2-3 reasons that support the refined claim")
+    concessions: list[str] = Field(description="Points conceded to the counterarguments")
+    remaining_vulnerabilities: list[str] = Field(description="Weaknesses that still exist in the argument")
+    confidence_delta: str = Field(description="Change in argument strength, e.g. +15% or -5%")
+
+
 class SynthesizeOutput(BaseModel):
     synthesis: str = Field(description="Refined argument text (2-3 paragraphs)")
-    argument_map: dict = Field(description="Structured breakdown with core_claim, refined_claim, warrants, concessions, remaining_vulnerabilities, confidence_delta")
+    argument_map: ArgumentMap = Field(description="Structured breakdown of the refined argument")
 
 
 # ── LLM factory ──────────────────────────────────────────────────────────────
@@ -204,24 +213,41 @@ async def interrogate(state: DialecticaState) -> dict:
         return {"error": str(e), "current_node": "interrogate"}
 
 
-# ── Node: synthesize (Phase 6 stub) ──────────────────────────────────────────
+# ── Node: synthesize ──────────────────────────────────────────────────────────
 
 async def synthesize(state: DialecticaState) -> dict:
     try:
-        logger.info("[synthesize] synthesizing final argument (stub)")
-        return {
-            "synthesis": (
-                "[STUB] After examining the counterarguments and your responses, "
-                "a refined version of your argument would be..."
+        logger.info("[synthesize] synthesizing final argument")
+
+        user_responses_text = (
+            "\n".join(
+                f"Q{i+1}: {q}\nA{i+1}: {r}"
+                for i, (q, r) in enumerate(
+                    zip(state.get("socratic_questions", []), state.get("user_responses", []))
+                )
+            )
+            or "No Socratic responses provided."
+        )
+
+        prompt = ChatPromptTemplate.from_messages([
+            ("system", SYNTHESIZE_SYSTEM),
+            ("human", SYNTHESIZE_USER),
+        ])
+        chain = prompt | _llm(settings.synthesis_model).with_structured_output(SynthesizeOutput)
+        result: SynthesizeOutput = await chain.ainvoke({
+            "original_claim": state.get("original_claim", ""),
+            "core_claim": state.get("core_claim", ""),
+            "steelman_text": state.get("steelman_text", ""),
+            "attacks": "\n".join(
+                f"{i+1}. {a}" for i, a in enumerate(state.get("attacks", []))
             ),
-            "argument_map": {
-                "core_claim": state.get("core_claim", ""),
-                "refined_claim": "[STUB] Refined claim incorporating user responses.",
-                "warrants": ["[STUB] Warrant 1", "[STUB] Warrant 2"],
-                "concessions": ["[STUB] Concession 1"],
-                "remaining_vulnerabilities": ["[STUB] Vulnerability 1"],
-                "confidence_delta": "+0%",
-            },
+            "user_responses": user_responses_text,
+        })
+
+        logger.info("[synthesize] done")
+        return {
+            "synthesis": result.synthesis,
+            "argument_map": result.argument_map.model_dump(),
             "awaiting_user": False,
             "current_node": "synthesize",
         }
