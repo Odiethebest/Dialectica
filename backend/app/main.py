@@ -114,11 +114,13 @@ async def health():
 async def build_index(x_admin_key: str = Header(None)):
     if x_admin_key != os.getenv("ADMIN_KEY", ""):
         raise HTTPException(status_code=403)
-    result = subprocess.run(
-        ["python", "backend/rag/build_index.py"],
-        capture_output=True, text=True,
+
+    import subprocess
+    find = subprocess.run(
+        ["find", "/app", "-name", "build_index.py"],
+        capture_output=True, text=True
     )
-    return {"stdout": result.stdout, "stderr": result.stderr, "returncode": result.returncode}
+    return {"find_result": find.stdout, "cwd": os.getcwd()}
 
 
 @app.post("/dialectica/start")
