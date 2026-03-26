@@ -1,5 +1,6 @@
-import { useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useDialectica } from './hooks/useDialectica'
+import { saveToHistory } from './utils/history'
 import ClaimInput from './components/ClaimInput'
 import PipelineStatus from './components/PipelineStatus'
 import DialogueThread from './components/DialogueThread'
@@ -17,6 +18,9 @@ export default function App() {
   } = useDialectica()
 
   const [originalClaim, setOriginalClaim] = useState('')
+  const [claim, setClaim] = useState('')
+  // Banner shown when URL param auto-starts the session
+  const [urlBanner, setUrlBanner] = useState('')
 
   const completedNodes = useMemo(() => {
     const done = new Set()
@@ -28,15 +32,57 @@ export default function App() {
     return done
   }, [coreClaim, steelmanText, attacks, socraticQuestions, synthesis])
 
-  const handleStart = (claim) => {
-    setOriginalClaim(claim)
-    startSession(claim)
-  }
+  // Shared auto-submit pattern: fill → 300ms delay → start
+  const handleAutoSubmit = useCallback((text) => {
+    if (!text || text.trim().length < 3) return
+    const trimmed = text.trim()
+    setClaim(trimmed)
+    saveToHistory(trimmed)
+    setTimeout(() => {
+      setOriginalClaim(trimmed)
+      startSession(trimmed)
+    }, 300)
+  }, [startSession])
+
+  // Manual begin (no delay — user already decided)
+  const handleStart = useCallback((text) => {
+    const trimmed = text.trim()
+    if (!trimmed) return
+    saveToHistory(trimmed)
+    setOriginalClaim(trimmed)
+    startSession(trimmed)
+  }, [startSession])
 
   const handleReset = () => {
     setOriginalClaim('')
+    setClaim('')
     reset()
   }
+
+  // Feature 2 — URL param deep-link
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    const claimParam = params.get('claim')
+    if (!claimParam?.trim()) return
+
+    const decoded = decodeURIComponent(claimParam.trim()).slice(0, 200)
+    // Clean URL immediately so a refresh doesn't re-trigger
+    window.history.replaceState({}, '', window.location.pathname)
+
+    setUrlBanner(decoded)
+    setClaim(decoded)
+
+    const bannerTimer = setTimeout(() => setUrlBanner(''), 1500)
+    const startTimer  = setTimeout(() => {
+      setUrlBanner('')
+      handleAutoSubmit(decoded)
+    }, 600)
+
+    return () => {
+      clearTimeout(bannerTimer)
+      clearTimeout(startTimer)
+    }
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <div className="dialectica-page">
@@ -50,8 +96,19 @@ export default function App() {
       </nav>
       <div className="d-gold-rule" />
 
+      {urlBanner && (
+        <div className="d-url-banner">
+          Starting with: <em>{urlBanner}</em>
+        </div>
+      )}
+
       {mode === 'idle' ? (
-        <ClaimInput onSubmit={handleStart} />
+        <ClaimInput
+          claim={claim}
+          onChange={setClaim}
+          onSubmit={handleStart}
+          onAutoSubmit={handleAutoSubmit}
+        />
       ) : (
         <div className="active-container">
           <PipelineStatus currentNode={currentNode} completedNodes={completedNodes} />
@@ -76,4 +133,3 @@ export default function App() {
     </div>
   )
 }
-

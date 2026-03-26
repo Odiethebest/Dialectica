@@ -492,6 +492,198 @@ body {
   line-height: 1.2;
 }
 
+/* ── URL banner ────────────────────────────────────────────────────────────── */
+
+.d-url-banner {
+  background: var(--d-maroon);
+  color: var(--d-gold3);
+  font-family: var(--d-serif);
+  font-size: 14px;
+  text-align: center;
+  padding: 10px 24px;
+  animation: parchment-in 200ms ease-out both;
+}
+
+/* ── Category bar ─────────────────────────────────────────────────────────── */
+
+.d-category-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.d-category-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-family: var(--d-sans);
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  color: var(--d-mid);
+  border: 1px solid var(--d-bg3);
+  border-radius: 20px;
+  padding: 6px 14px;
+  background: transparent;
+  cursor: pointer;
+  transition: background 100ms ease, color 100ms ease, border-color 100ms ease;
+}
+
+.d-category-btn:hover {
+  border-color: var(--d-gold2);
+  color: var(--d-body);
+}
+
+.d-category-btn.active {
+  background: var(--cat-color, var(--d-maroon));
+  color: #fff;
+  border-color: var(--cat-color, var(--d-maroon));
+}
+
+.d-cat-icon { font-size: 13px; line-height: 1; }
+.d-cat-label { }
+
+/* ── Category claim cards ──────────────────────────────────────────────────── */
+
+.d-category-claims {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.d-category-claim-card {
+  width: 100%;
+  text-align: left;
+  font-family: var(--d-serif);
+  font-size: 15px;
+  color: var(--d-body);
+  background: var(--d-bg2);
+  border: 1px solid var(--d-bg3);
+  border-radius: 8px;
+  padding: 14px 18px;
+  cursor: pointer;
+  transition: border-color 100ms ease;
+  line-height: 1.5;
+}
+
+.d-category-claim-card:hover {
+  border-color: var(--d-maroon2);
+}
+
+/* ── Textarea wrapper + mic ────────────────────────────────────────────────── */
+
+.d-textarea-wrapper {
+  position: relative;
+}
+
+.d-mic-btn {
+  position: absolute;
+  bottom: 12px;
+  right: 12px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1px solid var(--d-bg3);
+  background: var(--d-bg);
+  color: var(--d-muted);
+  font-size: 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: border-color 150ms ease, color 150ms ease;
+}
+
+.d-mic-btn:hover {
+  border-color: var(--d-gold2);
+  color: var(--d-mid);
+}
+
+.d-mic-btn.active {
+  border-color: var(--d-maroon2);
+  color: var(--d-maroon);
+  animation: mic-pulse 1s ease-in-out infinite;
+}
+
+@keyframes mic-pulse {
+  0%, 100% { box-shadow: 0 0 0 0   rgba(107, 16, 32, 0.3); }
+  50%       { box-shadow: 0 0 0 6px rgba(107, 16, 32, 0);   }
+}
+
+/* ── Random claim button ───────────────────────────────────────────────────── */
+
+.d-btn-random {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  font-family: var(--d-serif);
+  font-size: 13px;
+  font-style: italic;
+  color: var(--d-muted);
+  letter-spacing: 0.01em;
+  transition: color 100ms ease;
+}
+
+.d-btn-random:hover { color: var(--d-maroon); }
+
+/* ── History ───────────────────────────────────────────────────────────────── */
+
+.d-history {
+  margin-bottom: 0;
+}
+
+.d-history-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.d-history-label {
+  font-family: var(--d-sans);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--d-muted);
+}
+
+.d-history-item {
+  display: block;
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: none;
+  padding: 4px 0;
+  cursor: pointer;
+  font-family: var(--d-serif);
+  font-size: 14px;
+  font-style: italic;
+  color: var(--d-mid);
+  transition: color 100ms ease;
+  line-height: 1.6;
+}
+
+.d-history-item:hover {
+  color: var(--d-maroon);
+  text-decoration: underline;
+}
+
+.d-history-clear {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  font-family: var(--d-sans);
+  font-size: 11px;
+  color: var(--d-muted);
+  transition: color 100ms ease;
+}
+
+.d-history-clear:hover { color: var(--d-maroon); }
+
 /* ── Parchment blocks ─────────────────────────────────────────────────────── */
 
 @keyframes parchment-in {
@@ -576,12 +768,15 @@ body {
   }
 
   .d-btn-primary {
-    width: 100%;
-    justify-content: center;
-    margin-top: 14px;
     padding: 14px;
     font-size: 14px;
   }
+
+  .d-category-bar { flex-wrap: wrap; gap: 6px; }
+  .d-category-btn { font-size: 11px; padding: 5px 11px; }
+
+  .d-category-claims { gap: 6px; }
+  .d-category-claim-card { font-size: 14px; padding: 12px 14px; }
 
   .footnote { font-size: 13px; }
 
