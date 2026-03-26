@@ -8,13 +8,13 @@ import DialogueThread from './components/DialogueThread'
 export default function App() {
   const {
     mode, currentNode,
+    sessionId,
     coreClaim, claimAssumptions,
     steelmanText, steelmanSources,
     attacks,
     socraticQuestions,
-    userResponses,
     synthesis, argumentMap,
-    startSession, submitResponses, setUserResponse, reset,
+    startSession, submitResponses, reset,
   } = useDialectica()
 
   const [originalClaim, setOriginalClaim] = useState('')
@@ -114,6 +114,7 @@ export default function App() {
           <PipelineStatus currentNode={currentNode} completedNodes={completedNodes} />
           <DialogueThread
             originalClaim={originalClaim}
+            sessionId={sessionId}
             mode={mode}
             currentNode={currentNode}
             coreClaim={coreClaim}
@@ -122,10 +123,8 @@ export default function App() {
             steelmanSources={steelmanSources}
             attacks={attacks}
             socraticQuestions={socraticQuestions}
-            userResponses={userResponses}
             synthesis={synthesis}
             argumentMap={argumentMap}
-            onResponseChange={setUserResponse}
             onSubmitResponses={submitResponses}
           />
         </div>

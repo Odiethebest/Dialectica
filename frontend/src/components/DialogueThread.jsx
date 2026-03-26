@@ -8,6 +8,7 @@ import SynthesisBlock from './blocks/SynthesisBlock'
 
 export default function DialogueThread({
   originalClaim,
+  sessionId,
   mode,
   currentNode,
   coreClaim,
@@ -16,10 +17,8 @@ export default function DialogueThread({
   steelmanSources,
   attacks,
   socraticQuestions,
-  userResponses,
   synthesis,
   argumentMap,
-  onResponseChange,
   onSubmitResponses,
 }) {
   const streaming = (node) => mode === 'streaming' && currentNode === node
@@ -62,8 +61,7 @@ export default function DialogueThread({
       {mode === 'awaiting_input' && socraticQuestions?.length > 0 && (
         <ResponseForm
           questions={socraticQuestions}
-          responses={userResponses}
-          onChange={onResponseChange}
+          sessionId={sessionId}
           onSubmit={onSubmitResponses}
         />
       )}

@@ -229,3 +229,93 @@ User's Socratic responses:
 
 Synthesize a refined argument and argument map.\
 """
+
+# ── auto-respond (all three questions) ────────────────────────────────────────
+
+AUTO_RESPOND_SYSTEM = """\
+You are generating Socratic responses on behalf of the user.
+
+Stance behavior:
+- "defend": Hold the original claim firmly. Push back on each question by finding weaknesses in its premise.
+- "concede": Acknowledge that each question identifies a real weakness. Soften the claim in response.
+- "nuanced": Defend where the claim is strongest, concede where the attack is most damaging. Decide per question.
+
+Rules:
+- 2–4 sentences per response. Sound like a thoughtful person speaking, not an essay.
+- Start with your position — never restate the question first.
+- Never open with "That's a great question" or "I understand your concern".
+- Return ONLY valid JSON — a list of exactly 3 strings. No preamble. No markdown.\
+"""
+
+AUTO_RESPOND_USER = """\
+Original claim: {original_claim}
+
+Attacks that challenged the claim:
+{attacks}
+
+Socratic questions:
+{socratic_questions}
+
+Stance: {stance}
+
+Return a JSON array of 3 strings — one response per question, in order.\
+"""
+
+# ── auto-respond-one (single question, streaming) ─────────────────────────────
+
+AUTO_RESPOND_ONE_SYSTEM = """\
+You are generating a Socratic response on behalf of the user for a single question.
+
+Stance instruction: {stance_instruction}
+
+Rules:
+- 2–4 sentences. Sound like a thoughtful person speaking, not an essay.
+- Start with your position — never restate the question.
+- Never open with "That's a great question" or "I understand your concern".
+- Return plain text only. No JSON. No markdown.\
+"""
+
+AUTO_RESPOND_ONE_USER = """\
+Original claim: {original_claim}
+
+Attacks that challenged the claim:
+{attacks}
+
+Question to respond to:
+{question}
+
+Write a response.\
+"""
+
+# ── suggest-perspectives (3 options for a question) ───────────────────────────
+
+SUGGEST_PERSPECTIVES_SYSTEM = """\
+Generate exactly 3 distinct perspective options for responding to a specific Socratic question.
+Each option is a different rhetorical strategy the user could take.
+
+Rules:
+- The options must be genuinely different (not variations of the same move).
+- The hint is 1 sentence: the specific argument the user would make.
+- Use these IDs: "push_back", "reframe", "concede".
+
+Return ONLY valid JSON. No preamble. No markdown:
+{{
+  "perspectives": [
+    {{"id": "push_back", "label": "Push back on the premise", "hint": "...specific to this question..."}},
+    {{"id": "reframe",   "label": "Acknowledge and reframe",  "hint": "..."}},
+    {{"id": "concede",   "label": "Concede this point",       "hint": "..."}}
+  ]
+}}\
+"""
+
+SUGGEST_PERSPECTIVES_USER = """\
+Original claim: {original_claim}
+
+Attacks that challenged the claim:
+{attacks}
+
+Socratic question to respond to:
+{question}
+
+Generate 3 perspective options.\
+"""

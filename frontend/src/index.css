@@ -727,6 +727,199 @@ body {
 .parchment-dark .attack-numeral { color: var(--d-gold3); }
 .parchment-dark .parchment-label { color: #E0B84A; }
 
+/* ── Stance selector (Tier 1) ─────────────────────────────────────────────── */
+
+.d-stance-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--d-bg3);
+}
+
+.d-rlbl {
+  font-family: var(--d-sans);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--d-muted);
+  white-space: nowrap;
+}
+
+.d-stance-btns {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.d-stance-btn {
+  font-family: var(--d-serif);
+  font-size: 13px;
+  font-style: italic;
+  color: var(--d-mid);
+  border: 1px solid var(--d-bg3);
+  border-radius: 20px;
+  padding: 6px 14px;
+  background: none;
+  cursor: pointer;
+  transition: background 120ms ease, color 120ms ease, border-color 120ms ease;
+  white-space: nowrap;
+}
+
+.d-stance-btn:hover {
+  border-color: var(--d-maroon2);
+  color: var(--d-maroon);
+}
+
+.d-stance-btn.active {
+  background: var(--d-maroon);
+  color: #F5EAD8;
+  border-color: var(--d-maroon);
+}
+
+.d-btn-autofill {
+  font-family: var(--d-sans);
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  color: var(--d-maroon);
+  border: 1px solid var(--d-maroon2);
+  border-radius: 6px;
+  padding: 7px 16px;
+  background: none;
+  cursor: pointer;
+  margin-left: auto;
+  transition: background 120ms ease, color 120ms ease, border-color 120ms ease;
+  white-space: nowrap;
+}
+
+.d-btn-autofill:hover {
+  background: var(--d-maroon);
+  color: var(--d-gold3);
+  border-color: var(--d-gold2);
+}
+
+.d-btn-autofill:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* ── Per-question response field (Tier 2) ─────────────────────────────────── */
+
+.d-response-field {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.d-response-qnum {
+  font-family: var(--d-serif);
+  font-style: italic;
+  font-size: 14px;
+  color: var(--d-gold2);
+  min-width: 18px;
+  padding-top: 14px;
+  flex-shrink: 0;
+}
+
+.d-response-right {
+  flex: 1;
+  min-width: 0;
+}
+
+.d-response-ta {
+  min-height: 72px;
+  font-size: 16px;
+}
+
+.d-suggest-row {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.d-suggest-btn {
+  font-family: var(--d-serif);
+  font-size: 12px;
+  font-style: italic;
+  color: var(--d-muted);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  transition: color 100ms ease;
+  white-space: nowrap;
+}
+
+.d-suggest-btn:hover { color: var(--d-maroon); }
+.d-suggest-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.d-suggest-error {
+  font-family: var(--d-serif);
+  font-size: 12px;
+  font-style: italic;
+  color: var(--d-maroon);
+}
+
+/* ── Perspective picker (Tier 3) ──────────────────────────────────────────── */
+
+.d-perspective-picker {
+  background: var(--d-bg);
+  border: 1px solid var(--d-bg3);
+  border-top: 2px solid var(--d-gold2);
+  border-radius: 0 0 8px 8px;
+  padding: 12px 14px;
+  margin-top: -1px;
+  animation: block-in 150ms ease-out both;
+}
+
+.d-persp-label {
+  font-family: var(--d-sans);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--d-muted);
+  margin-bottom: 8px;
+}
+
+.d-persp-option {
+  display: block;
+  width: 100%;
+  text-align: left;
+  font-family: var(--d-serif);
+  font-size: 14px;
+  font-style: italic;
+  color: var(--d-mid);
+  background: none;
+  border: none;
+  border-bottom: 1px solid var(--d-bg3);
+  padding: 7px 0;
+  cursor: pointer;
+  transition: color 100ms ease;
+}
+
+.d-persp-option:last-of-type { border-bottom: none; }
+.d-persp-option:hover { color: var(--d-maroon); }
+
+.d-persp-cancel {
+  font-family: var(--d-sans);
+  font-size: 11px;
+  color: var(--d-muted);
+  background: none;
+  border: none;
+  cursor: pointer;
+  margin-top: 8px;
+  padding: 0;
+  transition: color 100ms ease;
+}
+
+.d-persp-cancel:hover { color: var(--d-maroon); }
+
 /* ── Mobile (< 768px) ─────────────────────────────────────────────────────── */
 
 @media (max-width: 767px) {
@@ -792,6 +985,10 @@ body {
 
   .response-form    { padding: 18px; }
   .response-textarea { min-height: 64px; font-size: 15px; }
+
+  .d-stance-row { gap: 8px; }
+  .d-btn-autofill { margin-left: 0; width: 100%; justify-content: center; text-align: center; }
+  .d-response-field { gap: 8px; }
 
   .d-btn-primary.btn-submit { width: 100%; justify-content: center; }
 

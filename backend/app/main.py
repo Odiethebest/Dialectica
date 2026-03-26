@@ -5,11 +5,18 @@ from datetime import datetime, timedelta, timezone
 
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from langchain_core.messages import HumanMessage, SystemMessage
+from langchain_openai import ChatOpenAI
 from pydantic import BaseModel
 from sse_starlette.sse import EventSourceResponse
 
 from .config import settings
 from .graph.graph import build_graph
+from .graph.prompts import (
+    AUTO_RESPOND_SYSTEM, AUTO_RESPOND_USER,
+    AUTO_RESPOND_ONE_SYSTEM, AUTO_RESPOND_ONE_USER,
+    SUGGEST_PERSPECTIVES_SYSTEM, SUGGEST_PERSPECTIVES_USER,
+)
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -56,6 +63,42 @@ class StartRequest(BaseModel):
 class RespondRequest(BaseModel):
     session_id: str
     responses: list[str]
+
+
+class AutoRespondRequest(BaseModel):
+    session_id: str
+    stance: str  # "defend" | "concede" | "nuanced"
+
+
+class AutoRespondOneRequest(BaseModel):
+    session_id: str
+    question_index: int
+    stance: str
+    perspective_hint: str = ""  # set when a Tier 3 perspective was selected
+
+
+class SuggestPerspectivesRequest(BaseModel):
+    session_id: str
+    question_index: int
+
+
+# ── Helpers ───────────────────────────────────────────────────────────────────
+
+def _get_session_state(session_id: str):
+    """Return (session_dict, graph_state_values) or (None, None) if not found."""
+    session = sessions.get(session_id)
+    if not session:
+        return None, None
+    config = {"configurable": {"thread_id": session["thread_id"]}}
+    state = graph.get_state(config)
+    return session, state.values
+
+
+def _llm(model: str | None = None) -> ChatOpenAI:
+    return ChatOpenAI(
+        model=model or settings.default_model,
+        api_key=settings.openai_api_key,
+    )
 
 
 # ── Endpoints ────────────────────────────────────────────────────────────────
@@ -196,3 +239,147 @@ async def respond(body: RespondRequest, req: Request):
             yield {"event": "error", "data": safe_json({"message": str(e)})}
 
     return EventSourceResponse(event_generator())
+
+
+@app.post("/dialectica/auto-respond")
+async def auto_respond(body: AutoRespondRequest):
+    """
+    Generate all 3 Socratic responses at once, aligned to a stance.
+    Returns SSE: response_1, response_2, response_3, complete.
+    """
+    _, values = _get_session_state(body.session_id)
+
+    async def event_generator():
+        if values is None:
+            yield {"event": "error", "data": safe_json({"message": "Session not found or expired."})}
+            return
+
+        try:
+            attacks_text = "\n".join(values.get("attacks", []))
+            questions = values.get("socratic_questions", [])
+            questions_text = "\n".join(f"{i+1}. {q}" for i, q in enumerate(questions))
+
+            system_msg = AUTO_RESPOND_SYSTEM
+            user_msg = AUTO_RESPOND_USER.format(
+                original_claim=values.get("original_claim", ""),
+                attacks=attacks_text,
+                socratic_questions=questions_text,
+                stance=body.stance,
+            )
+
+            llm = _llm()
+            result = await llm.ainvoke([
+                SystemMessage(content=system_msg),
+                HumanMessage(content=user_msg),
+            ])
+
+            responses = json.loads(result.content)
+            if not isinstance(responses, list) or len(responses) < 3:
+                raise ValueError("LLM did not return a list of 3 responses")
+
+            for i, text in enumerate(responses[:3]):
+                yield {"event": f"response_{i+1}", "data": safe_json({"index": i, "text": text})}
+
+            yield {"event": "complete", "data": safe_json({})}
+
+        except Exception as e:
+            logger.exception("Error in /dialectica/auto-respond")
+            yield {"event": "error", "data": safe_json({"message": str(e)})}
+
+    return EventSourceResponse(event_generator())
+
+
+@app.post("/dialectica/auto-respond-one")
+async def auto_respond_one(body: AutoRespondOneRequest, req: Request):
+    """
+    Generate a single Socratic response, streaming tokens.
+    Returns SSE token stream, then complete.
+    """
+    _, values = _get_session_state(body.session_id)
+
+    async def event_generator():
+        if values is None:
+            yield {"event": "error", "data": safe_json({"message": "Session not found or expired."})}
+            return
+
+        try:
+            questions = values.get("socratic_questions", [])
+            if body.question_index >= len(questions):
+                raise ValueError("question_index out of range")
+
+            attacks_text = "\n".join(values.get("attacks", []))
+            question = questions[body.question_index]
+
+            # Build stance instruction from stance ID + optional hint
+            if body.perspective_hint:
+                stance_instruction = body.perspective_hint
+            elif body.stance == "defend":
+                stance_instruction = "Push back firmly. Find weaknesses in the question's premise."
+            elif body.stance == "concede":
+                stance_instruction = "Acknowledge the weakness the question exposes. Soften the claim."
+            else:  # nuanced / default
+                stance_instruction = "Evaluate honestly. Defend if the claim holds here, concede if the attack is strong."
+
+            system_msg = AUTO_RESPOND_ONE_SYSTEM.format(stance_instruction=stance_instruction)
+            user_msg = AUTO_RESPOND_ONE_USER.format(
+                original_claim=values.get("original_claim", ""),
+                attacks=attacks_text,
+                question=question,
+            )
+
+            llm = _llm()
+            async for chunk in llm.astream([
+                SystemMessage(content=system_msg),
+                HumanMessage(content=user_msg),
+            ]):
+                if await req.is_disconnected():
+                    break
+                if chunk.content:
+                    yield {"event": "token", "data": safe_json({"text": chunk.content})}
+
+            yield {"event": "complete", "data": safe_json({})}
+
+        except Exception as e:
+            logger.exception("Error in /dialectica/auto-respond-one")
+            yield {"event": "error", "data": safe_json({"message": str(e)})}
+
+    return EventSourceResponse(event_generator())
+
+
+@app.post("/dialectica/suggest-perspectives")
+async def suggest_perspectives(body: SuggestPerspectivesRequest):
+    """
+    Generate 3 perspective options for a specific Socratic question.
+    Returns JSON (not streaming).
+    """
+    _, values = _get_session_state(body.session_id)
+    if values is None:
+        return {"error": "Session not found or expired."}
+
+    try:
+        questions = values.get("socratic_questions", [])
+        if body.question_index >= len(questions):
+            return {"error": "question_index out of range"}
+
+        attacks_text = "\n".join(values.get("attacks", []))
+        question = questions[body.question_index]
+
+        system_msg = SUGGEST_PERSPECTIVES_SYSTEM
+        user_msg = SUGGEST_PERSPECTIVES_USER.format(
+            original_claim=values.get("original_claim", ""),
+            attacks=attacks_text,
+            question=question,
+        )
+
+        llm = _llm()
+        result = await llm.ainvoke([
+            SystemMessage(content=system_msg),
+            HumanMessage(content=user_msg),
+        ])
+
+        data = json.loads(result.content)
+        return data
+
+    except Exception as e:
+        logger.exception("Error in /dialectica/suggest-perspectives")
+        return {"error": str(e)}
