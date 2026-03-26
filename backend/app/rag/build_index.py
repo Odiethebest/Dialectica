@@ -15,7 +15,7 @@ from pathlib import Path
 from langchain.schema import Document
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_chroma import Chroma
-from langchain_google_genai import GoogleGenerativeAIEmbeddings
+from langchain_openai import OpenAIEmbeddings
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 logger = logging.getLogger(__name__)
@@ -100,27 +100,20 @@ def build_index() -> None:
     chunks = split_documents(docs)
     logger.info("Total chunks to embed: %d", len(chunks))
 
-    logger.info("Initialising Gemini embeddings (gemini-embedding-001)...")
-    embeddings = GoogleGenerativeAIEmbeddings(model="models/gemini-embedding-001")
+    logger.info("Initialising OpenAI embeddings (text-embedding-3-small)...")
+    from ..config import settings
+    embeddings = OpenAIEmbeddings(model="text-embedding-3-small", api_key=settings.openai_api_key)
 
     logger.info("Building ChromaDB index at: %s", CHROMA_DIR)
     CHROMA_DIR.mkdir(exist_ok=True)
 
-    # Free tier: 100 embed requests/min (each doc = 1 request).
-    # Embed one doc at a time at ~85 docs/min to stay under the limit.
-    import time
-    logger.info("Embedding %d docs one at a time (rate-limited to ~85/min)...", len(chunks))
-    vectorstore = Chroma(
+    logger.info("Embedding %d chunks...", len(chunks))
+    vectorstore = Chroma.from_documents(
+        documents=chunks,
+        embedding=embeddings,
         collection_name=COLLECTION_NAME,
-        embedding_function=embeddings,
         persist_directory=str(CHROMA_DIR),
     )
-    for i, chunk in enumerate(chunks):
-        vectorstore.add_documents([chunk])
-        if i < len(chunks) - 1:
-            time.sleep(0.7)
-        if (i + 1) % 20 == 0:
-            logger.info("  %d/%d embedded...", i + 1, len(chunks))
 
     logger.info(
         "Index built. Collection '%s' contains %d vectors.",

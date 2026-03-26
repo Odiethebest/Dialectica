@@ -7,7 +7,7 @@ Phase 6: synthesize (real LLM) — stub below
 
 import logging
 from pydantic import BaseModel, Field
-from langchain_google_genai import ChatGoogleGenerativeAI
+from langchain_openai import ChatOpenAI
 from langchain_core.prompts import ChatPromptTemplate
 
 from .state import DialecticaState
@@ -63,10 +63,10 @@ class SynthesizeOutput(BaseModel):
 
 # ── LLM factory ──────────────────────────────────────────────────────────────
 
-def _llm(model: str | None = None) -> ChatGoogleGenerativeAI:
-    return ChatGoogleGenerativeAI(
+def _llm(model: str | None = None) -> ChatOpenAI:
+    return ChatOpenAI(
         model=model or settings.default_model,
-        google_api_key=settings.google_api_key,
+        api_key=settings.openai_api_key,
         temperature=0.3,
     )
 

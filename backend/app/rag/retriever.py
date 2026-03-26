@@ -10,7 +10,7 @@ from pathlib import Path
 
 from langchain.schema import Document
 from langchain_chroma import Chroma
-from langchain_google_genai import GoogleGenerativeAIEmbeddings
+from langchain_openai import OpenAIEmbeddings
 
 logger = logging.getLogger(__name__)
 
@@ -26,9 +26,9 @@ def _get_vectorstore() -> Chroma:
             "ChromaDB not found. Run: python -m app.rag.build_index"
         )
     from ..config import settings
-    embeddings = GoogleGenerativeAIEmbeddings(
-        model="models/gemini-embedding-001",
-        google_api_key=settings.google_api_key,
+    embeddings = OpenAIEmbeddings(
+        model=settings.embedding_model,
+        api_key=settings.openai_api_key,
     )
     return Chroma(
         collection_name=COLLECTION_NAME,
