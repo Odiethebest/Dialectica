@@ -116,11 +116,16 @@ async def build_index(x_admin_key: str = Header(None)):
         raise HTTPException(status_code=403)
 
     import subprocess
-    find = subprocess.run(
-        ["find", "/app", "-name", "build_index.py"],
-        capture_output=True, text=True
+    result = subprocess.run(
+        ["python", "/app/backend/app/rag/build_index.py"],
+        capture_output=True, text=True,
+        cwd="/app"
     )
-    return {"find_result": find.stdout, "cwd": os.getcwd()}
+    return {
+        "stdout": result.stdout,
+        "stderr": result.stderr,
+        "returncode": result.returncode
+    }
 
 
 @app.post("/dialectica/start")
