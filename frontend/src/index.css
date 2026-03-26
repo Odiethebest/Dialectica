@@ -23,6 +23,9 @@ html { font-size: 16px; }
   --d-sans:  system-ui, -apple-system, sans-serif;
   --d-mono:  'SF Mono', 'Menlo', monospace;
 
+  --d-serif-zh: 'Noto Serif SC', 'Source Han Serif SC', 'STSong', 'SimSun', Georgia, serif;
+  --d-sans-zh:  'Noto Sans SC', 'PingFang SC', 'Microsoft YaHei', system-ui, sans-serif;
+
   --border-radius-md: 6px;
 }
 
@@ -993,4 +996,85 @@ body {
   .d-btn-primary.btn-submit { width: 100%; justify-content: center; }
 
   .argument-map { grid-template-columns: 1fr; }
+}
+
+/* ── Language toggle button ─────────────────────────────────────────────────── */
+
+.d-lang-btn {
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  color: var(--d-gold);
+  background: none;
+  border: 1px solid #A8841E44;
+  border-radius: 4px;
+  padding: 4px 10px;
+  cursor: pointer;
+  transition: color 120ms, border-color 120ms;
+  margin-right: 12px;
+  font-family: var(--d-sans);
+}
+.d-lang-btn:hover {
+  color: var(--d-gold3);
+  border-color: var(--d-gold2);
+}
+
+/* ── Chinese typography overrides (lang-zh) ─────────────────────────────────── */
+
+.lang-zh {
+  font-feature-settings: "chws" 1; /* CJK punctuation compression */
+}
+
+.lang-zh .h1,
+.lang-zh .h2 {
+  font-family: var(--d-serif-zh);
+  font-size: 48px;
+  line-height: 1.3;
+  font-style: normal;
+  letter-spacing: 0.02em;
+}
+
+.lang-zh .block-body,
+.lang-zh .btxt {
+  font-family: var(--d-serif-zh);
+  font-size: 15px;
+  line-height: 2;
+  letter-spacing: 0.01em;
+}
+
+.lang-zh .d-textarea,
+.lang-zh .d-response-ta {
+  font-family: var(--d-sans-zh);
+  font-size: 16px;
+  line-height: 1.9;
+}
+
+.lang-zh .d-chip,
+.lang-zh .d-category-claim-card {
+  font-family: var(--d-sans-zh);
+  font-style: normal;
+}
+
+.lang-zh .block-label,
+.lang-zh .d-rlbl,
+.lang-zh .pipeline-node-label,
+.lang-zh .arg-map-label {
+  font-family: var(--d-sans-zh);
+  letter-spacing: 0.04em;
+}
+
+.lang-zh .footnote {
+  font-family: var(--d-sans-zh);
+  font-style: normal;
+  line-height: 1.8;
+}
+
+.lang-zh .d-history-label {
+  font-family: var(--d-sans-zh);
+}
+
+@media (max-width: 767px) {
+  .lang-zh .h1,
+  .lang-zh .h2 {
+    font-size: 34px;
+  }
 }

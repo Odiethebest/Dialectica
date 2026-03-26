@@ -1,10 +1,11 @@
 import ParchmentBlock from '../ParchmentBlock'
+import { t } from '../../i18n/strings'
 
 const ROMAN = ['I', 'II', 'III']
 
-export default function SocraticBlock({ questions, isStreaming }) {
+export default function SocraticBlock({ questions, isStreaming, lang = 'en' }) {
   return (
-    <ParchmentBlock type="socratic" label="Socratic questions" isStreaming={isStreaming}>
+    <ParchmentBlock type="socratic" label={t(lang, 'socratic')} isStreaming={isStreaming}>
       {isStreaming && !questions?.length ? (
         <p className="block-body cursor" style={{ color: 'var(--d-muted)' }}>&nbsp;</p>
       ) : (

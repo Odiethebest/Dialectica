@@ -1,3 +1,5 @@
+import { t } from '../i18n/strings'
+
 const NODES = ['understand', 'steelman', 'attack', 'interrogate', 'synthesize']
 
 function nodeState(name, currentNode, completedNodes) {
@@ -6,14 +8,14 @@ function nodeState(name, currentNode, completedNodes) {
   return 'pending'
 }
 
-export default function PipelineStatus({ currentNode, completedNodes }) {
+export default function PipelineStatus({ currentNode, completedNodes, lang = 'en' }) {
+  const labels = t(lang, 'pipelineNodes')
+
   return (
     <div className="pipeline">
       {NODES.map((name, i) => {
         const state = nodeState(name, currentNode, completedNodes)
-        const labelColor = state === 'active'
-          ? 'var(--d-maroon)'
-          : state === 'complete'
+        const labelColor = state === 'active' || state === 'complete'
           ? 'var(--d-maroon)'
           : 'var(--d-muted)'
 
@@ -24,7 +26,7 @@ export default function PipelineStatus({ currentNode, completedNodes }) {
                 {state === 'complete' ? '✓' : state === 'active' ? '●' : '○'}
               </div>
               <span className="pipeline-node-label" style={{ color: labelColor }}>
-                {name}
+                {labels[i]}
               </span>
             </div>
             {i < NODES.length - 1 && (

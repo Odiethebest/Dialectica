@@ -4,6 +4,7 @@ from typing import TypedDict, Optional
 class DialecticaState(TypedDict):
     # Input
     original_claim: str           # User's raw input, never mutated
+    lang: str                     # "en" | "zh" — propagates through all nodes
 
     # Node outputs
     core_claim: str               # understand: distilled 1-sentence claim

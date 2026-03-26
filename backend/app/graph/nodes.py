@@ -12,13 +12,7 @@ from langchain_core.messages import HumanMessage, SystemMessage
 from langchain_core.prompts import ChatPromptTemplate
 
 from .state import DialecticaState
-from .prompts import (
-    UNDERSTAND_SYSTEM, UNDERSTAND_USER,
-    STEELMAN_SYSTEM, STEELMAN_USER,
-    ATTACK_SYSTEM, ATTACK_USER,
-    INTERROGATE_SYSTEM, INTERROGATE_USER,
-    SYNTHESIZE_SYSTEM, SYNTHESIZE_USER,
-)
+from .prompts import get_prompt
 from ..config import settings
 from ..rag.retriever import retrieve
 from ..tools.search import tavily_search
@@ -77,10 +71,12 @@ def _llm(model: str | None = None) -> ChatOpenAI:
 async def understand(state: DialecticaState) -> dict:
     try:
         logger.info("[understand] claim: %s", state["original_claim"][:80])
+        lang = state.get("lang", "en")
+        system_prompt, user_prompt = get_prompt("understand", lang)
 
         prompt = ChatPromptTemplate.from_messages([
-            ("system", UNDERSTAND_SYSTEM),
-            ("human", UNDERSTAND_USER),
+            ("system", system_prompt),
+            ("human", user_prompt),
         ])
         chain = prompt | _llm().with_structured_output(UnderstandOutput)
         result: UnderstandOutput = await chain.ainvoke({
@@ -103,6 +99,8 @@ async def understand(state: DialecticaState) -> dict:
 async def steelman(state: DialecticaState) -> dict:
     try:
         logger.info("[steelman] core_claim: %s", state["core_claim"][:80])
+        lang = state.get("lang", "en")
+        system_prompt, user_prompt = get_prompt("steelman", lang)
 
         # RAG retrieval — search for supporting philosophical context
         docs = retrieve(state["core_claim"], k=3)
@@ -112,8 +110,8 @@ async def steelman(state: DialecticaState) -> dict:
         )
 
         prompt = ChatPromptTemplate.from_messages([
-            ("system", STEELMAN_SYSTEM),
-            ("human", STEELMAN_USER),
+            ("system", system_prompt),
+            ("human", user_prompt),
         ])
         chain = prompt | _llm().with_structured_output(SteelmanOutput)
         result: SteelmanOutput = await chain.ainvoke({
@@ -138,6 +136,8 @@ async def steelman(state: DialecticaState) -> dict:
 async def attack(state: DialecticaState) -> dict:
     try:
         logger.info("[attack] generating counterarguments for: %s", state["core_claim"][:80])
+        lang = state.get("lang", "en")
+        system_prompt, user_prompt = get_prompt("attack", lang)
 
         # RAG retrieval — search for counterarguments in philosophical corpus
         rag_query = f"counterargument against: {state['core_claim']}"
@@ -163,8 +163,8 @@ async def attack(state: DialecticaState) -> dict:
         )
 
         prompt = ChatPromptTemplate.from_messages([
-            ("system", ATTACK_SYSTEM),
-            ("human", ATTACK_USER),
+            ("system", system_prompt),
+            ("human", user_prompt),
         ])
         chain = prompt | _llm().with_structured_output(AttackOutput)
         result: AttackOutput = await chain.ainvoke({
@@ -191,10 +191,12 @@ async def attack(state: DialecticaState) -> dict:
 async def interrogate(state: DialecticaState) -> dict:
     try:
         logger.info("[interrogate] generating Socratic questions")
+        lang = state.get("lang", "en")
+        system_prompt, user_prompt = get_prompt("interrogate", lang)
 
         prompt = ChatPromptTemplate.from_messages([
-            ("system", INTERROGATE_SYSTEM),
-            ("human", INTERROGATE_USER),
+            ("system", system_prompt),
+            ("human", user_prompt),
         ])
         chain = prompt | _llm().with_structured_output(InterrogateOutput)
         result: InterrogateOutput = await chain.ainvoke({
@@ -232,10 +234,12 @@ async def synthesize(state: DialecticaState) -> dict:
 
         # Use direct message construction to avoid ChatPromptTemplate interpreting
         # the JSON schema braces in SYNTHESIZE_SYSTEM as template variables.
+        lang = state.get("lang", "en")
+        system_prompt, user_prompt = get_prompt("synthesize", lang)
         structured_llm = _llm(settings.synthesis_model).with_structured_output(SynthesizeOutput)
         messages = [
-            SystemMessage(content=SYNTHESIZE_SYSTEM),
-            HumanMessage(content=SYNTHESIZE_USER.format(
+            SystemMessage(content=system_prompt),
+            HumanMessage(content=user_prompt.format(
                 original_claim=state.get("original_claim", ""),
                 core_claim=state.get("core_claim", ""),
                 steelman_text=state.get("steelman_text", ""),

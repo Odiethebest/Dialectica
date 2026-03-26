@@ -92,13 +92,13 @@ export function useDialectica() {
     }
   }, [])
 
-  const startSession = useCallback(async (claim) => {
+  const startSession = useCallback(async (claim, lang = 'en') => {
     patch({ mode: 'streaming', currentNode: null, error: null })
     try {
       const res = await fetch('/dialectica/start', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ claim }),
+        body: JSON.stringify({ claim, lang }),
       })
       await processStream(res)
     } catch (err) {

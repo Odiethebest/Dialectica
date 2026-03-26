@@ -1,8 +1,9 @@
 import ParchmentBlock from '../ParchmentBlock'
+import { t } from '../../i18n/strings'
 
-export default function UnderstandBlock({ coreClaim, claimAssumptions, isStreaming }) {
+export default function UnderstandBlock({ coreClaim, claimAssumptions, isStreaming, lang = 'en' }) {
   return (
-    <ParchmentBlock type="understand" label="Core claim · Assumptions" isStreaming={isStreaming}>
+    <ParchmentBlock type="understand" label={t(lang, 'coreClaim')} isStreaming={isStreaming}>
       {isStreaming && !coreClaim ? (
         <p className="block-body cursor" style={{ color: 'var(--d-muted)' }}>&nbsp;</p>
       ) : (
@@ -12,7 +13,7 @@ export default function UnderstandBlock({ coreClaim, claimAssumptions, isStreami
           </p>
           {claimAssumptions?.length > 0 && (
             <p className="block-source">
-              Assumes: {claimAssumptions.join(' · ')}
+              {t(lang, 'assumes')} {claimAssumptions.join(' · ')}
             </p>
           )}
         </>

@@ -12,11 +12,7 @@ from sse_starlette.sse import EventSourceResponse
 
 from .config import settings
 from .graph.graph import build_graph
-from .graph.prompts import (
-    AUTO_RESPOND_SYSTEM, AUTO_RESPOND_USER,
-    AUTO_RESPOND_ONE_SYSTEM, AUTO_RESPOND_ONE_USER,
-    SUGGEST_PERSPECTIVES_SYSTEM, SUGGEST_PERSPECTIVES_USER,
-)
+from .graph.prompts import get_prompt
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -58,6 +54,7 @@ def safe_json(obj) -> str:
 
 class StartRequest(BaseModel):
     claim: str
+    lang: str = "en"
 
 
 class RespondRequest(BaseModel):
@@ -127,6 +124,7 @@ async def start(body: StartRequest, req: Request):
     config = {"configurable": {"thread_id": thread_id}}
     initial_state = {
         "original_claim": body.claim,
+        "lang": body.lang if body.lang in ("en", "zh") else "en",
         "core_claim": "",
         "claim_assumptions": [],
         "steelman_text": "",
@@ -259,8 +257,9 @@ async def auto_respond(body: AutoRespondRequest):
             questions = values.get("socratic_questions", [])
             questions_text = "\n".join(f"{i+1}. {q}" for i, q in enumerate(questions))
 
-            system_msg = AUTO_RESPOND_SYSTEM
-            user_msg = AUTO_RESPOND_USER.format(
+            lang = values.get("lang", "en")
+            system_msg, user_prompt_tpl = get_prompt("auto_respond", lang)
+            user_msg = user_prompt_tpl.format(
                 original_claim=values.get("original_claim", ""),
                 attacks=attacks_text,
                 socratic_questions=questions_text,
@@ -310,18 +309,28 @@ async def auto_respond_one(body: AutoRespondOneRequest, req: Request):
             attacks_text = "\n".join(values.get("attacks", []))
             question = questions[body.question_index]
 
+            lang = values.get("lang", "en")
             # Build stance instruction from stance ID + optional hint
             if body.perspective_hint:
                 stance_instruction = body.perspective_hint
-            elif body.stance == "defend":
-                stance_instruction = "Push back firmly. Find weaknesses in the question's premise."
-            elif body.stance == "concede":
-                stance_instruction = "Acknowledge the weakness the question exposes. Soften the claim."
-            else:  # nuanced / default
-                stance_instruction = "Evaluate honestly. Defend if the claim holds here, concede if the attack is strong."
+            elif lang == "zh":
+                if body.stance == "defend":
+                    stance_instruction = "坚定反驳，找出问题前提的弱点。"
+                elif body.stance == "concede":
+                    stance_instruction = "承认问题揭示的弱点，在回应中软化主张。"
+                else:
+                    stance_instruction = "诚实评估：如果主张在此成立则捍卫，如果攻击有力则让步。"
+            else:
+                if body.stance == "defend":
+                    stance_instruction = "Push back firmly. Find weaknesses in the question's premise."
+                elif body.stance == "concede":
+                    stance_instruction = "Acknowledge the weakness the question exposes. Soften the claim."
+                else:
+                    stance_instruction = "Evaluate honestly. Defend if the claim holds here, concede if the attack is strong."
 
-            system_msg = AUTO_RESPOND_ONE_SYSTEM.format(stance_instruction=stance_instruction)
-            user_msg = AUTO_RESPOND_ONE_USER.format(
+            system_tpl, user_prompt_tpl = get_prompt("auto_respond_one", lang)
+            system_msg = system_tpl.format(stance_instruction=stance_instruction)
+            user_msg = user_prompt_tpl.format(
                 original_claim=values.get("original_claim", ""),
                 attacks=attacks_text,
                 question=question,
@@ -364,8 +373,9 @@ async def suggest_perspectives(body: SuggestPerspectivesRequest):
         attacks_text = "\n".join(values.get("attacks", []))
         question = questions[body.question_index]
 
-        system_msg = SUGGEST_PERSPECTIVES_SYSTEM
-        user_msg = SUGGEST_PERSPECTIVES_USER.format(
+        lang = values.get("lang", "en")
+        system_msg, user_prompt_tpl = get_prompt("suggest_perspectives", lang)
+        user_msg = user_prompt_tpl.format(
             original_claim=values.get("original_claim", ""),
             attacks=attacks_text,
             question=question,

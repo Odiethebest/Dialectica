@@ -54,7 +54,8 @@
       "Bash(pip show:*)",
       "Bash(ls:*)",
       "Bash(git -C /Users/odieyang/Documents/Projects/Dialectica add -A)",
-      "Bash(git -C /Users/odieyang/Documents/Projects/Dialectica commit -m \"Move spec docs into Docs/\")"
+      "Bash(git -C /Users/odieyang/Documents/Projects/Dialectica commit -m \"Move spec docs into Docs/\")",
+      "Bash(git:*)"
     ]
   }
 }

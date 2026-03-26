@@ -1,22 +1,16 @@
 import { useRef, useState } from 'react'
 import { getRandomClaim, CATEGORIES, CLAIMS_BY_CATEGORY } from '../data/randomClaims'
+import { getRandomZhClaim, ZH_CATEGORIES, ZH_CLAIMS_BY_CATEGORY, ZH_DEFAULT_CHIPS } from '../i18n/claims.zh'
 import { getHistory, clearHistory } from '../utils/history'
 import { useSpeechInput } from '../hooks/useSpeechInput'
+import { t } from '../i18n/strings'
 
-const DEFAULT_CHIPS = [
-  'AI will replace most creative jobs',
-  'Democracy is the best system of government',
-  'Remote work reduces productivity',
-  'Social media has made people more polarized',
-  'Free will is an illusion',
-]
-
-export default function ClaimInput({ claim, onChange, onSubmit, onAutoSubmit }) {
+export default function ClaimInput({ claim, onChange, onSubmit, onAutoSubmit, lang = 'en' }) {
   const textareaRef = useRef(null)
   const [activeCategory, setActiveCategory] = useState(null)
   const [history, setHistory] = useState(() => getHistory())
 
-  const { listening, start, stop, supported: speechSupported } = useSpeechInput(onChange)
+  const { listening, start, stop, supported: speechSupported } = useSpeechInput(onChange, lang)
 
   const handleKey = (e) => {
     if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) onSubmit(claim)
@@ -28,22 +22,36 @@ export default function ClaimInput({ claim, onChange, onSubmit, onAutoSubmit }) 
   }
 
   const handleSurpriseMe = () => {
-    const next = getRandomClaim(claim)
+    const next = lang === 'zh' ? getRandomZhClaim(claim) : getRandomClaim(claim)
     onChange(next)
     textareaRef.current?.focus()
   }
 
-  const chips = activeCategory ? CLAIMS_BY_CATEGORY[activeCategory] : DEFAULT_CHIPS
+  // Switch category/claim data based on lang
+  const categories    = lang === 'zh' ? ZH_CATEGORIES    : CATEGORIES
+  const claimsByCategory = lang === 'zh' ? ZH_CLAIMS_BY_CATEGORY : CLAIMS_BY_CATEGORY
+  const defaultChips  = lang === 'zh' ? ZH_DEFAULT_CHIPS : [
+    'AI will replace most creative jobs',
+    'Democracy is the best system of government',
+    'Remote work reduces productivity',
+    'Social media has made people more polarized',
+    'Free will is an illusion',
+  ]
+
+  // Reset active category when switching language
+  const chips = activeCategory && claimsByCategory[activeCategory]
+    ? claimsByCategory[activeCategory]
+    : defaultChips
 
   return (
     <div className="idle-container">
 
-      <p className="h1">Make an argument.</p>
-      <p className="h2">We'll make it harder.</p>
+      <p className="h1">{t(lang, 'headline1')}</p>
+      <p className="h2">{t(lang, 'headline2')}</p>
 
       {/* Category bar */}
       <div className="d-category-bar">
-        {Object.entries(CATEGORIES).map(([name, { icon, color }]) => (
+        {Object.entries(categories).map(([name, { icon, color }]) => (
           <button
             key={name}
             className={`d-category-btn${activeCategory === name ? ' active' : ''}`}
@@ -62,7 +70,7 @@ export default function ClaimInput({ claim, onChange, onSubmit, onAutoSubmit }) 
           ref={textareaRef}
           className="d-textarea"
           rows={4}
-          placeholder="Enter a claim, thesis, or position you want to defend…"
+          placeholder={t(lang, 'placeholder')}
           value={claim}
           onChange={e => onChange(e.target.value)}
           onKeyDown={handleKey}
@@ -80,7 +88,7 @@ export default function ClaimInput({ claim, onChange, onSubmit, onAutoSubmit }) 
       </div>
 
       {/* Chips / category claims */}
-      {activeCategory ? (
+      {activeCategory && claimsByCategory[activeCategory] ? (
         <div className="d-category-claims">
           {chips.map(c => (
             <button key={c} className="d-category-claim-card" onClick={() => onAutoSubmit(c)}>
@@ -101,7 +109,7 @@ export default function ClaimInput({ claim, onChange, onSubmit, onAutoSubmit }) 
       {/* Surprise me + Begin row */}
       <div style={{ display: 'flex', alignItems: 'center', marginTop: 16 }}>
         <button className="d-btn-random" onClick={handleSurpriseMe} type="button">
-          Surprise me →
+          {t(lang, 'surpriseBtn')}
         </button>
         <button
           className="d-btn-primary"
@@ -110,7 +118,7 @@ export default function ClaimInput({ claim, onChange, onSubmit, onAutoSubmit }) 
           disabled={!claim.trim()}
           type="button"
         >
-          Begin ↗
+          {t(lang, 'beginBtn')}
         </button>
       </div>
 
@@ -120,8 +128,10 @@ export default function ClaimInput({ claim, onChange, onSubmit, onAutoSubmit }) 
       {history.length > 0 && (
         <div className="d-history">
           <div className="d-history-header">
-            <span className="d-history-label">Recent</span>
-            <button className="d-history-clear" onClick={handleClearHistory}>Clear</button>
+            <span className="d-history-label">{t(lang, 'recentLabel')}</span>
+            <button className="d-history-clear" onClick={handleClearHistory}>
+              {t(lang, 'clearBtn')}
+            </button>
           </div>
           {history.map(h => (
             <button key={h} className="d-history-item" onClick={() => onAutoSubmit(h)}>
@@ -132,9 +142,7 @@ export default function ClaimInput({ claim, onChange, onSubmit, onAutoSubmit }) 
       )}
 
       <p className="footnote" style={{ marginTop: history.length > 0 ? 20 : 0 }}>
-        Dialectica does not validate your thinking — it challenges it. The engine
-        attacks your claim, questions your assumptions, and returns a stronger
-        argument.
+        {t(lang, 'footnote')}
       </p>
 
     </div>

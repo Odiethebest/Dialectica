@@ -5,6 +5,7 @@ import AttackBlock from './blocks/AttackBlock'
 import SocraticBlock from './blocks/SocraticBlock'
 import ResponseForm from './blocks/ResponseForm'
 import SynthesisBlock from './blocks/SynthesisBlock'
+import { t } from '../i18n/strings'
 
 export default function DialogueThread({
   originalClaim,
@@ -20,19 +21,21 @@ export default function DialogueThread({
   synthesis,
   argumentMap,
   onSubmitResponses,
+  lang = 'en',
 }) {
   const streaming = (node) => mode === 'streaming' && currentNode === node
 
   return (
     <div style={{ marginTop: '1.5rem' }}>
 
-      <ClaimBlock claim={originalClaim} />
+      <ClaimBlock claim={originalClaim} lang={lang} />
 
       {(coreClaim || streaming('understand')) && (
         <UnderstandBlock
           coreClaim={coreClaim}
           claimAssumptions={claimAssumptions}
           isStreaming={streaming('understand')}
+          lang={lang}
         />
       )}
 
@@ -41,6 +44,7 @@ export default function DialogueThread({
           steelmanText={steelmanText}
           steelmanSources={steelmanSources}
           isStreaming={streaming('steelman')}
+          lang={lang}
         />
       )}
 
@@ -48,6 +52,7 @@ export default function DialogueThread({
         <AttackBlock
           attacks={attacks}
           isStreaming={streaming('attack')}
+          lang={lang}
         />
       )}
 
@@ -55,6 +60,7 @@ export default function DialogueThread({
         <SocraticBlock
           questions={socraticQuestions}
           isStreaming={streaming('interrogate')}
+          lang={lang}
         />
       )}
 
@@ -63,6 +69,7 @@ export default function DialogueThread({
           questions={socraticQuestions}
           sessionId={sessionId}
           onSubmit={onSubmitResponses}
+          lang={lang}
         />
       )}
 
@@ -71,6 +78,7 @@ export default function DialogueThread({
           synthesis={synthesis}
           argumentMap={argumentMap}
           isStreaming={streaming('synthesize')}
+          lang={lang}
         />
       )}
 
@@ -82,7 +90,7 @@ export default function DialogueThread({
           color: 'var(--d-attack)',
           marginTop: 8,
         }}>
-          Something went wrong. Please try again.
+          {t(lang, 'errorMsg')}
         </p>
       )}
 

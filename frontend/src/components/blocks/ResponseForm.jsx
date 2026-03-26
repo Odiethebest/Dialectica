@@ -1,22 +1,17 @@
 import { useState } from 'react'
 import { readSSE } from '../../utils/readSSE'
+import { t } from '../../i18n/strings'
 
 const ROMAN = ['I', 'II', 'III']
 
-const STANCES = [
-  { id: 'defend',  label: 'Defend my claim' },
-  { id: 'nuanced', label: 'Nuanced' },
-  { id: 'concede', label: 'Concede the attacks' },
-]
-
 // ── ResponseTextarea (Tier 2 + Tier 3) ────────────────────────────────────────
 
-function ResponseTextarea({ index, question, value, onChange, sessionId, stance }) {
+function ResponseTextarea({ index, question, value, onChange, sessionId, stance, lang }) {
   const [suggesting, setSuggesting] = useState(false)
   const [showPerspectives, setShowPerspectives] = useState(false)
   const [perspectives, setPerspectives] = useState([])
   const [loadingPersp, setLoadingPersp] = useState(false)
-  const [selectedPersp, setSelectedPersp] = useState(null) // for regeneration
+  const [selectedPersp, setSelectedPersp] = useState(null)
   const [error, setError] = useState(null)
 
   const hasSuggestion = value.trim().length > 0
@@ -54,14 +49,12 @@ function ResponseTextarea({ index, question, value, onChange, sessionId, stance 
   }
 
   const handleSuggestClick = async () => {
-    // Already has content or already had a perspective → regenerate directly
     if (hasSuggestion || selectedPersp) {
       const p = selectedPersp
       await generate(p ? p.id : stance, p ? p.hint : '')
       return
     }
 
-    // First time: fetch perspective options (Tier 3)
     setLoadingPersp(true)
     setError(null)
     try {
@@ -75,7 +68,6 @@ function ResponseTextarea({ index, question, value, onChange, sessionId, stance 
         setPerspectives(data.perspectives)
         setShowPerspectives(true)
       } else {
-        // Fallback: generate directly with global stance
         await generate(stance)
       }
     } catch (e) {
@@ -92,28 +84,28 @@ function ResponseTextarea({ index, question, value, onChange, sessionId, stance 
   }
 
   const btnLabel = suggesting
-    ? 'Writing…'
+    ? t(lang, 'writing')
     : loadingPersp
-    ? 'Loading…'
+    ? t(lang, 'loading')
     : hasSuggestion || selectedPersp
-    ? 'Regenerate ↺'
-    : 'Suggest →'
+    ? t(lang, 'regenerateBtn')
+    : t(lang, 'suggestBtn')
 
   return (
     <div className="d-response-field">
       <div className="d-response-qnum">{ROMAN[index]}.</div>
       <div className="d-response-right">
         <textarea
-          className={`d-textarea d-response-ta`}
+          className="d-textarea d-response-ta"
           rows={3}
-          placeholder={`Response to question ${ROMAN[index]}…`}
+          placeholder={t(lang, 'responsePlaceholder')(ROMAN[index])}
           value={value}
           onChange={e => onChange(e.target.value)}
         />
 
         {showPerspectives && (
           <div className="d-perspective-picker">
-            <div className="d-persp-label">Suggest as:</div>
+            <div className="d-persp-label">{t(lang, 'suggestAs')}</div>
             {perspectives.map(p => (
               <button
                 key={p.id}
@@ -125,7 +117,7 @@ function ResponseTextarea({ index, question, value, onChange, sessionId, stance 
               </button>
             ))}
             <button className="d-persp-cancel" onClick={() => setShowPerspectives(false)}>
-              Cancel
+              {t(lang, 'cancelBtn')}
             </button>
           </div>
         )}
@@ -147,11 +139,17 @@ function ResponseTextarea({ index, question, value, onChange, sessionId, stance 
 
 // ── ResponseForm (Tier 1 + orchestrates Tier 2 & 3) ──────────────────────────
 
-export default function ResponseForm({ questions, sessionId, onSubmit }) {
+export default function ResponseForm({ questions, sessionId, onSubmit, lang = 'en' }) {
   const [stance, setStance] = useState('nuanced')
   const [responses, setResponses] = useState(['', '', ''])
   const [autoFilling, setAutoFilling] = useState(false)
   const [errors, setErrors] = useState([false, false, false])
+
+  const STANCES = [
+    { id: 'defend',  label: t(lang, 'stanceDefend')  },
+    { id: 'nuanced', label: t(lang, 'stanceNuanced') },
+    { id: 'concede', label: t(lang, 'stanceConcede') },
+  ]
 
   const setResponse = (i, val) =>
     setResponses(prev => { const next = [...prev]; next[i] = val; return next })
@@ -170,7 +168,7 @@ export default function ResponseForm({ questions, sessionId, onSubmit }) {
         else if (type === 'response_3') setResponse(2, data.text)
       }
     } catch (e) {
-      // fail silently — textareas keep whatever partial state they have
+      // fail silently
     } finally {
       setAutoFilling(false)
     }
@@ -190,7 +188,7 @@ export default function ResponseForm({ questions, sessionId, onSubmit }) {
     <div className="response-form">
       {/* Tier 1 — Stance selector */}
       <div className="d-stance-row">
-        <span className="d-rlbl">Your stance</span>
+        <span className="d-rlbl">{t(lang, 'yourResponses')}</span>
         <div className="d-stance-btns">
           {STANCES.map(s => (
             <button
@@ -207,7 +205,7 @@ export default function ResponseForm({ questions, sessionId, onSubmit }) {
           onClick={handleAutoFillAll}
           disabled={autoFilling}
         >
-          {autoFilling ? 'Generating…' : 'Auto-fill all ↗'}
+          {autoFilling ? t(lang, 'generating') : t(lang, 'autoFillAll')}
         </button>
       </div>
 
@@ -221,6 +219,7 @@ export default function ResponseForm({ questions, sessionId, onSubmit }) {
           onChange={(val) => setResponse(i, val)}
           sessionId={sessionId}
           stance={stance}
+          lang={lang}
         />
       ))}
 
@@ -231,7 +230,7 @@ export default function ResponseForm({ questions, sessionId, onSubmit }) {
           onClick={handleSubmit}
           disabled={responses.some(r => !r.trim())}
         >
-          Submit responses ↗
+          {t(lang, 'submitBtn')}
         </button>
       </div>
     </div>

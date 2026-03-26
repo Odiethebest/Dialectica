@@ -1,17 +1,17 @@
 import { useState } from 'react'
+import { t } from '../i18n/strings'
 
-const THRESHOLD = 160
-
-export default function ReadMoreText({ text, className, style }) {
+export default function ReadMoreText({ text, className, style, lang = 'en' }) {
   const [expanded, setExpanded] = useState(false)
+  const threshold = lang === 'zh' ? 80 : 160
 
-  if (!text || text.length <= THRESHOLD) {
+  if (!text || text.length <= threshold) {
     return <p className={className} style={style}>{text}</p>
   }
 
   return (
     <p className={className} style={style}>
-      {expanded ? text : text.slice(0, THRESHOLD).trimEnd() + '…'}
+      {expanded ? text : text.slice(0, threshold).trimEnd() + '…'}
       {' '}
       <button
         onClick={() => setExpanded(e => !e)}
@@ -26,7 +26,7 @@ export default function ReadMoreText({ text, className, style }) {
           letterSpacing: '0.02em',
         }}
       >
-        {expanded ? 'Read less ←' : 'Read more →'}
+        {expanded ? t(lang, 'readLess') : t(lang, 'readMore')}
       </button>
     </p>
   )

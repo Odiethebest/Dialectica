@@ -1,5 +1,6 @@
 import ParchmentBlock from '../ParchmentBlock'
 import ReadMoreText from '../ReadMoreText'
+import { t } from '../../i18n/strings'
 
 const ROMAN = ['I', 'II', 'III']
 
@@ -9,9 +10,9 @@ function parseAttack(raw) {
   return { source: null, text: raw }
 }
 
-export default function AttackBlock({ attacks, isStreaming }) {
+export default function AttackBlock({ attacks, isStreaming, lang = 'en' }) {
   return (
-    <ParchmentBlock type="attack" label="Attacks" isStreaming={isStreaming}>
+    <ParchmentBlock type="attack" label={t(lang, 'attacks')} isStreaming={isStreaming}>
       {isStreaming && !attacks?.length ? (
         <p className="block-body cursor">&nbsp;</p>
       ) : (
@@ -25,7 +26,7 @@ export default function AttackBlock({ attacks, isStreaming }) {
             >
               <span className="attack-numeral">{ROMAN[i]}.</span>
               <div>
-                <ReadMoreText text={text} className="block-body" />
+                <ReadMoreText text={text} className="block-body" lang={lang} />
                 {source && (
                   <p className="block-source" style={{ marginTop: 4 }}>· {source}</p>
                 )}

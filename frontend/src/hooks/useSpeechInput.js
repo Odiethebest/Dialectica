@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react'
 
-export function useSpeechInput(onTranscript) {
+export function useSpeechInput(onTranscript, lang = 'en') {
   const [listening, setListening] = useState(false)
   const recognitionRef = useRef(null)
 
@@ -14,7 +14,7 @@ export function useSpeechInput(onTranscript) {
     const r = new SR()
     r.continuous = false
     r.interimResults = true
-    r.lang = navigator.language.startsWith('zh') ? 'zh-CN' : 'en-US'
+    r.lang = lang === 'zh' ? 'zh-CN' : 'en-US'
 
     r.onresult = (e) => {
       const transcript = Array.from(e.results)
