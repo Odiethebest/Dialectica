@@ -1,10 +1,12 @@
 import json
 import logging
+import os
+import subprocess
 import uuid
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Header, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
@@ -106,6 +108,17 @@ def _llm(model: str | None = None) -> ChatOpenAI:
 @app.get("/health")
 async def health():
     return {"status": "ok"}
+
+
+@app.post("/admin/build-index")
+async def build_index(x_admin_key: str = Header(None)):
+    if x_admin_key != os.getenv("ADMIN_KEY", ""):
+        raise HTTPException(status_code=403)
+    result = subprocess.run(
+        ["python", "backend/rag/build_index.py"],
+        capture_output=True, text=True,
+    )
+    return {"stdout": result.stdout, "stderr": result.stderr, "returncode": result.returncode}
 
 
 @app.post("/dialectica/start")
