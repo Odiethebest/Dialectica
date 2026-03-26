@@ -8,6 +8,7 @@ Phase 6: synthesize (real LLM) — stub below
 import logging
 from pydantic import BaseModel, Field
 from langchain_openai import ChatOpenAI
+from langchain_core.messages import HumanMessage, SystemMessage
 from langchain_core.prompts import ChatPromptTemplate
 
 from .state import DialecticaState
@@ -229,20 +230,22 @@ async def synthesize(state: DialecticaState) -> dict:
             or "No Socratic responses provided."
         )
 
-        prompt = ChatPromptTemplate.from_messages([
-            ("system", SYNTHESIZE_SYSTEM),
-            ("human", SYNTHESIZE_USER),
-        ])
-        chain = prompt | _llm(settings.synthesis_model).with_structured_output(SynthesizeOutput)
-        result: SynthesizeOutput = await chain.ainvoke({
-            "original_claim": state.get("original_claim", ""),
-            "core_claim": state.get("core_claim", ""),
-            "steelman_text": state.get("steelman_text", ""),
-            "attacks": "\n".join(
-                f"{i+1}. {a}" for i, a in enumerate(state.get("attacks", []))
-            ),
-            "user_responses": user_responses_text,
-        })
+        # Use direct message construction to avoid ChatPromptTemplate interpreting
+        # the JSON schema braces in SYNTHESIZE_SYSTEM as template variables.
+        structured_llm = _llm(settings.synthesis_model).with_structured_output(SynthesizeOutput)
+        messages = [
+            SystemMessage(content=SYNTHESIZE_SYSTEM),
+            HumanMessage(content=SYNTHESIZE_USER.format(
+                original_claim=state.get("original_claim", ""),
+                core_claim=state.get("core_claim", ""),
+                steelman_text=state.get("steelman_text", ""),
+                attacks="\n".join(
+                    f"{i+1}. {a}" for i, a in enumerate(state.get("attacks", []))
+                ),
+                user_responses=user_responses_text,
+            )),
+        ]
+        result: SynthesizeOutput = await structured_llm.ainvoke(messages)
 
         logger.info("[synthesize] done")
         return {
