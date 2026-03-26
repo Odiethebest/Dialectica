@@ -3,7 +3,6 @@
 > *"An unexamined argument is not worth making."*
 > — adapted from Socrates, *Apology* (38a)
 
----
 
 ## The Problem with Being Agreed With
 
@@ -13,7 +12,6 @@ The result is a technology that is extraordinarily capable of generating text bu
 
 Dialectica is an attempt to correct that asymmetry.
 
----
 
 ## The Socratic Method as a Design Primitive
 
@@ -25,7 +23,6 @@ This structure is, at its core, an adversarial dialogue loop. It has a well-defi
 
 Dialectica formalizes this algorithm and executes it at scale.
 
----
 
 ## The Steel Man as a Prerequisite for Honest Attack
 
@@ -35,7 +32,6 @@ This sequencing matters. An attack on a strong argument is more informative than
 
 Dialectica enforces this order structurally. The system's LangGraph pipeline requires a completed steelman stage before the attack node can execute. The model cannot skip to counterarguments without first retrieving supporting evidence from a curated philosophical corpus and constructing the most defensible version of the user's position. This is not merely pedagogically principled. It produces materially better synthesis outputs, because the final refinement node has access to both the strongest case for the claim and the strongest case against it.
 
----
 
 ## On the Epistemology of Counterargument
 
@@ -45,7 +41,6 @@ This distinction has practical consequences for system design. Dialectica's atta
 
 The goal is not to defeat the user's claim. It is to locate its edges.
 
----
 
 ## The Interrogation as the Site of Real Learning
 
@@ -55,7 +50,6 @@ This is why Dialectica's architecture includes a human-in-the-loop pause before 
 
 The synthesis is not a verdict. It is a record of a dialogue.
 
----
 
 ## Technical Architecture as Argument
 
@@ -63,7 +57,6 @@ The choice to implement Dialectica as a stateful LangGraph pipeline rather than 
 
 LangGraph's explicit state machine enforces this dependency structure. The `DialecticaState` object carries the full lineage of the dialogue across every node, and no node can access information it has not been explicitly passed. This is not an implementation detail. It is an architectural commitment to the idea that context is not optional in adversarial reasoning.
 
----
 
 ## On Difficulty as a Feature
 
@@ -71,28 +64,39 @@ The user experience of Dialectica is deliberately uncomfortable. The steelman is
 
 This friction is intentional. The alternative would be a system that challenges you gently, accepts vague responses, and tells you your argument is much stronger now. It would be more pleasant and less useful. The measure of a good adversarial dialogue is not how good it makes you feel. It is how much harder it makes you think.
 
----
 
 ## References
 
-1. Plato. *Apology*. Trans. Benjamin Jowett. MIT Internet Classics Archive. http://classics.mit.edu/Plato/apology.html
+1. Plato. *Apology*. Trans. Benjamin Jowett. MIT Internet Classics Archive. [classics.mit.edu][1]
 
-2. Plato. *Meno*. Trans. Benjamin Jowett. MIT Internet Classics Archive. http://classics.mit.edu/Plato/meno.html
+2. Plato. *Meno*. Trans. Benjamin Jowett. MIT Internet Classics Archive. [classics.mit.edu][2]
 
-3. Vlastos, Gregory. "The Socratic Elenchus." *Oxford Studies in Ancient Philosophy* 1 (1983): 27–58. https://doi.org/10.1093/0199240606.003.0002
+3. Vlastos, Gregory. "The Socratic Elenchus." *Oxford Studies in Ancient Philosophy* 1 (1983): 27–58. [doi:10.1093/0199240606.003.0002][3]
 
-4. Walton, Douglas. *Informal Logic: A Pragmatic Approach*. 2nd ed. Cambridge University Press, 2008. https://doi.org/10.1017/CBO9780511809088
+4. Walton, Douglas. *Informal Logic: A Pragmatic Approach*. 2nd ed. Cambridge University Press, 2008. [doi:10.1017/CBO9780511809088][4]
 
-5. Bail, Christopher A., et al. "Exposure to Opposing Views on Social Media Can Increase Political Polarization." *Proceedings of the National Academy of Sciences* 115, no. 37 (2018): 9216–9221. https://doi.org/10.1073/pnas.1804840115
+5. Bail, Christopher A., et al. "Exposure to Opposing Views on Social Media Can Increase Political Polarization." *Proceedings of the National Academy of Sciences* 115, no. 37 (2018): 9216–9221. [doi:10.1073/pnas.1804840115][5]
 
-6. Pew Research Center. "Political Polarization in the American Public." June 2014. https://www.pewresearch.org/politics/2014/06/12/political-polarization-in-the-american-public/
+6. Pew Research Center. "Political Polarization in the American Public." June 2014. [pewresearch.org][6]
 
-7. Nguyen, C. Thi. "Echo Chambers and Epistemic Bubbles." *Episteme* 17, no. 2 (2020): 141–161. https://doi.org/10.1017/epi.2019.10
+7. Nguyen, C. Thi. "Echo Chambers and Epistemic Bubbles." *Episteme* 17, no. 2 (2020): 141–161. [doi:10.1017/epi.2019.10][7]
 
-8. Kahneman, Daniel. *Thinking, Fast and Slow*. Farrar, Straus and Giroux, 2011. https://us.macmillan.com/books/9780374533557/thinkingfastandslow
+8. Kahneman, Daniel. *Thinking, Fast and Slow*. Farrar, Straus and Giroux, 2011. [macmillan.com][8]
 
-9. Chase, Harrison. "LangGraph: Multi-Agent Workflows." LangChain Blog, 2024. https://blog.langchain.dev/langgraph-multi-agent-workflows/
+9. Chase, Harrison. "LangGraph: Multi-Agent Workflows." LangChain Blog, 2024. [blog.langchain.dev][9]
 
-10. Lewis, Patrick, et al. "Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks." *Advances in Neural Information Processing Systems* 33 (2020): 9459–9474. https://arxiv.org/abs/2005.11401
+10. Lewis, Patrick, et al. "Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks." *Advances in Neural Information Processing Systems* 33 (2020): 9459–9474. [arXiv:2005.11401][10]
 
-11. Ziegler, Daniel M., et al. "Fine-Tuning Language Models from Human Preferences." arXiv:1909.08593 (2019). https://arxiv.org/abs/1909.08593
+11. Ziegler, Daniel M., et al. "Fine-Tuning Language Models from Human Preferences." arXiv:1909.08593 (2019). [arXiv:1909.08593][11]
+
+[1]: http://classics.mit.edu/Plato/apology.html
+[2]: http://classics.mit.edu/Plato/meno.html
+[3]: https://doi.org/10.1093/0199240606.003.0002
+[4]: https://doi.org/10.1017/CBO9780511809088
+[5]: https://doi.org/10.1073/pnas.1804840115
+[6]: https://www.pewresearch.org/politics/2014/06/12/political-polarization-in-the-american-public/
+[7]: https://doi.org/10.1017/epi.2019.10
+[8]: https://us.macmillan.com/books/9780374533557/thinkingfastandslow
+[9]: https://blog.langchain.dev/langgraph-multi-agent-workflows/
+[10]: https://arxiv.org/abs/2005.11401
+[11]: https://arxiv.org/abs/1909.08593
