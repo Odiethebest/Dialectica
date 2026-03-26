@@ -117,9 +117,10 @@ async def build_index(x_admin_key: str = Header(None)):
 
     import subprocess
     result = subprocess.run(
-        ["python", "/app/backend/app/rag/build_index.py"],
+        ["python", "-m", "backend.app.rag.build_index"],
         capture_output=True, text=True,
-        cwd="/app"
+        cwd="/app",
+        env={**os.environ, "PYTHONPATH": "/app"}
     )
     return {
         "stdout": result.stdout,
