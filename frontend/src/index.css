@@ -492,6 +492,49 @@ body {
   line-height: 1.2;
 }
 
+/* ── Parchment blocks ─────────────────────────────────────────────────────── */
+
+@keyframes parchment-in {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0);    }
+}
+
+.parchment-block {
+  position: relative;
+  margin-bottom: 20px;
+}
+
+.parchment-block.parchment-ready {
+  animation: parchment-in 280ms ease-out forwards;
+}
+
+.parchment-block.parchment-streaming {
+  border-radius: 0 var(--border-radius-md) var(--border-radius-md) 0;
+  border-left: 2px solid rgba(196, 152, 58, 0.4);
+}
+
+.parchment-svg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.parchment-content {
+  position: relative;
+  z-index: 1;
+  padding: 22px 36px 26px 32px;
+}
+
+/* Dark variant (attack block) — override text colors */
+.parchment-dark .block-body  { color: #F0E8DC; }
+.parchment-dark .block-source { color: var(--d-gold); }
+.parchment-dark .attack-numeral { color: var(--d-gold3); }
+.parchment-dark .parchment-label { color: #E0B84A; }
+
 /* ── Mobile (< 768px) ─────────────────────────────────────────────────────── */
 
 @media (max-width: 767px) {

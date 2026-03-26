@@ -1,15 +1,10 @@
+import ParchmentBlock from '../ParchmentBlock'
+
 const ROMAN = ['I', 'II', 'III']
 
 export default function SocraticBlock({ questions, isStreaming }) {
   return (
-    <div
-      className="dialogue-block"
-      style={{ borderLeft: '2px solid var(--d-maroon2)', background: 'var(--d-goldbg)' }}
-    >
-      <div className="block-label" style={{ color: 'var(--d-maroon)' }}>
-        Socratic questions
-      </div>
-
+    <ParchmentBlock type="socratic" label="Socratic questions" isStreaming={isStreaming}>
       {isStreaming && !questions?.length ? (
         <p className="block-body cursor" style={{ color: 'var(--d-muted)' }}>&nbsp;</p>
       ) : (
@@ -34,6 +29,6 @@ export default function SocraticBlock({ questions, isStreaming }) {
           </div>
         ))
       )}
-    </div>
+    </ParchmentBlock>
   )
 }

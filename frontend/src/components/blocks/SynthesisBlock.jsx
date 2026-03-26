@@ -1,26 +1,20 @@
+import ParchmentBlock from '../ParchmentBlock'
+import ReadMoreText from '../ReadMoreText'
+
 export default function SynthesisBlock({ synthesis, argumentMap, isStreaming }) {
   return (
-    <div style={{
-      border: '1px solid var(--d-gold2)',
-      borderLeft: '2px solid var(--d-gold)',
-      borderRadius: `0 var(--border-radius-md) var(--border-radius-md) 0`,
-      background: 'var(--d-bg)',
-      padding: '22px 24px',
-      marginBottom: 16,
-      animation: 'block-in 200ms ease-out both',
-    }}>
-      <div className="block-label" style={{ color: 'var(--d-gold2)' }}>
-        Refined argument
-      </div>
-
+    <ParchmentBlock type="synthesis" label="Refined argument" isStreaming={isStreaming}>
       {isStreaming && !synthesis ? (
         <p className="block-body cursor" style={{ color: 'var(--d-muted)' }}>&nbsp;</p>
       ) : (
-        <p className={`block-body${isStreaming ? ' cursor' : ''}`}>{synthesis}</p>
+        <ReadMoreText
+          text={synthesis}
+          className={`block-body${isStreaming ? ' cursor' : ''}`}
+        />
       )}
 
       {argumentMap && <ArgumentMapGrid map={argumentMap} />}
-    </div>
+    </ParchmentBlock>
   )
 }
 

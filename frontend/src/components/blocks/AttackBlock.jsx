@@ -1,3 +1,6 @@
+import ParchmentBlock from '../ParchmentBlock'
+import ReadMoreText from '../ReadMoreText'
+
 const ROMAN = ['I', 'II', 'III']
 
 function parseAttack(raw) {
@@ -8,14 +11,9 @@ function parseAttack(raw) {
 
 export default function AttackBlock({ attacks, isStreaming }) {
   return (
-    <div
-      className="dialogue-block"
-      style={{ borderLeft: '2px solid var(--d-maroon3)', background: 'var(--d-maroon)' }}
-    >
-      <div className="block-label" style={{ color: 'var(--d-gold3)' }}>Attacks</div>
-
+    <ParchmentBlock type="attack" label="Attacks" isStreaming={isStreaming}>
       {isStreaming && !attacks?.length ? (
-        <p className="block-body cursor" style={{ color: '#F0E8DC' }}>&nbsp;</p>
+        <p className="block-body cursor">&nbsp;</p>
       ) : (
         attacks?.map((raw, i) => {
           const { source, text } = parseAttack(raw)
@@ -25,25 +23,17 @@ export default function AttackBlock({ attacks, isStreaming }) {
               className="attack-item"
               style={{ animationDelay: `${i * 80}ms` }}
             >
-              <span className="attack-numeral" style={{ color: 'var(--d-gold3)' }}>{ROMAN[i]}.</span>
-              <p className="block-body" style={{ color: '#F0E8DC' }}>
-                {text}
+              <span className="attack-numeral">{ROMAN[i]}.</span>
+              <div>
+                <ReadMoreText text={text} className="block-body" />
                 {source && (
-                  <span style={{
-                    fontFamily: 'var(--d-serif)',
-                    fontSize: 13,
-                    fontStyle: 'italic',
-                    color: 'var(--d-gold)',
-                    marginLeft: 6,
-                  }}>
-                    · {source}
-                  </span>
+                  <p className="block-source" style={{ marginTop: 4 }}>· {source}</p>
                 )}
-              </p>
+              </div>
             </div>
           )
         })
       )}
-    </div>
+    </ParchmentBlock>
   )
 }
