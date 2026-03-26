@@ -1,209 +1,296 @@
-# 设计思路：后端
+# Backend Design
 
-## 一、核心问题
+## 1. The Core Problem
 
-Dialectica 的后端需要解决一个本质上是**有状态的、多步骤的 AI 对话流程**：用户提交 claim → 系统经过 5 个 LLM 节点处理 → 中途暂停等待用户回答 → 恢复继续 → 输出最终结论。
+The Dialectica backend manages an inherently stateful, multi-step AI conversation: the user submits a claim → the system runs it through 5 LLM nodes → execution pauses for user input → resumes → produces a final synthesis. This is not a one-shot LLM call; it is an interruptible reasoning chain that must persist context across multiple HTTP requests.
 
-这不是一次性的 LLM 调用，而是一条需要维持上下文、可中断、可恢复的推理链。选型的出发点就是：什么架构能把这条链管理得最清晰。
+The design question is: what architecture makes this chain manageable, debuggable, and easy to extend?
 
 ---
 
-## 二、技术栈选择
+## 2. Technology Choices
 
-### LangGraph：状态机而非 AgentExecutor
+### LangGraph: Explicit State Machine
 
-最初考虑过用 LangChain 的 `AgentExecutor` + 工具调用链。放弃的原因：
+The main alternative was LangChain's `AgentExecutor`. It was rejected because:
 
-- `AgentExecutor` 是 loop-based，不适合需要固定节点顺序的流程
-- 中断/恢复（interrupt）支持不原生，需要大量 hack
-- 节点间状态传递不透明，调试困难
+- `AgentExecutor` is loop-based and unsuited to a fixed node order
+- Interrupt/resume is not natively supported; it requires significant hacks
+- State passing between steps is opaque, making debugging painful
 
-LangGraph 的 `StateGraph` 解决了这些问题：
+LangGraph's `StateGraph` solves all three:
 
 ```
 [START] → understand → steelman → attack → interrogate → [INTERRUPT] → synthesize → [END]
 ```
 
-每个节点是一个独立的 async 函数，读取 `DialecticaState`，只写入自己负责的字段。节点间通过共享 state 通信，图的拓扑在 `graph.py` 里一次性声明清楚，不会散落在各处。
+Each node is an independent `async def` that reads `DialecticaState` and writes only to its own designated fields. The graph topology is declared once in `graph.py` and never leaks into individual node functions.
 
-**中断机制**用 `interrupt_before=["synthesize"]`：图在进入 synthesize 节点之前自动暂停，把控制权还给 API。等用户提交 Socratic 回答后，调用 `graph.update_state()` 注入数据，再调用 `graph.astream_events(None, config=config)` 恢复执行。
+**Interrupt mechanism:** `interrupt_before=["synthesize"]` causes the graph to pause before entering the synthesize node. The API detects the pause by checking `state.next`, emits an `awaiting_input` SSE event with the Socratic questions, then waits. When the user submits responses, `graph.update_state()` injects `user_responses` into the frozen state, and `graph.astream_events(None, config=config)` resumes execution from the checkpoint.
 
-**MemorySaver** 作为 checkpointer，把每个 thread 的 state 存在内存里。选择内存而不是 Redis/数据库的原因：这是 portfolio demo，无需持久化，简单最重要。每个 session 有独立的 `thread_id`，graph 通过 `{"configurable": {"thread_id": ...}}` 区分。
+**MemorySaver** serves as the checkpointer, storing per-thread state in memory. A persistent store (Redis, Postgres) is unnecessary for a portfolio demo; MemorySaver keeps the setup simple. Each session gets its own UUID `thread_id`; the graph uses `{"configurable": {"thread_id": ...}}` to keep sessions isolated.
 
-### FastAPI + SSE：推流而非轮询
+### FastAPI + SSE: Streaming over Polling
 
-用户体验的关键是**实时看到每个节点的输出**，而不是等全部跑完再一次性返回。方案对比：
+Real-time streaming of each node's output is central to the user experience. The options:
 
-| 方案 | 问题 |
+| Option | Problem |
 |---|---|
-| WebSocket | 需要维护双向连接，前端复杂度高 |
-| HTTP 轮询 | 延迟高，服务器压力大 |
-| SSE | 单向推流，HTTP 原生支持，前端用 `fetch` + async generator 即可 |
+| WebSocket | Bidirectional, frontend complexity is higher |
+| HTTP polling | High latency, wastes server resources |
+| SSE | Unidirectional push over plain HTTP, works with `fetch` + async generator |
 
-前端 `odieyang.com` 已经有 SSE 使用经验（Pulse 项目），复用同一套模式。
-
-用 `sse-starlette` 的 `EventSourceResponse` 包裹一个 async generator：
+`sse-starlette`'s `EventSourceResponse` wraps an async generator. The generator calls `graph.astream_events(...)` with `version="v2"`, which exposes fine-grained `on_chain_start`, `on_chat_model_stream`, and `on_chain_end` events per node — not just the coarse final output of the graph.
 
 ```python
 async def event_generator():
     async for event in graph.astream_events(initial_state, config=config, version="v2"):
-        name = event.get("name", "")
         kind = event.get("event", "")
+        name = event.get("name", "")
         if kind == "on_chain_start" and name in NODE_NAMES:
             yield {"event": "node_start", "data": ...}
-        elif kind == "on_chat_model_stream":
+        elif kind == "on_chat_model_stream" and name in NODE_NAMES:
             yield {"event": "token", "data": ...}
-        elif kind == "on_chain_end":
+        elif kind == "on_chain_end" and name in NODE_NAMES:
             yield {"event": "node_end", "data": ...}
 ```
 
-`astream_events` 是 LangGraph 的事件流接口，可以精细拦截每个节点的 start/stream/end 事件，而不是粗粒度的整图输出。
+### LLM Tiering: gpt-4o-mini + gpt-4o
 
-### LLM 分级：gpt-4o-mini + gpt-4o
+The first four nodes (understand, steelman, attack, interrogate) use `gpt-4o-mini`:
+- Tasks are clearly scoped with fixed output structures enforced by `with_structured_output(PydanticModel)`
+- Speed and cost matter on iterative, back-to-back nodes
 
-前 4 个节点（understand/steelman/attack/interrogate）用 `gpt-4o-mini`：
+The `synthesize` node uses `gpt-4o`:
+- This is the final user-facing output; quality takes priority
+- It must coherently integrate the full context: original claim, steelman, attacks, and Socratic responses
 
-- 任务明确，输出结构固定，用 `with_structured_output(PydanticModel)` 强制格式
-- mini 速度快、成本低，适合迭代密集的节点
+### ChromaDB: Zero-Infrastructure Vector Store
 
-synthesize 节点用 `gpt-4o`：
+RAG retrieval needs a vector database. For a portfolio demo, operational simplicity wins over scalability. ChromaDB persists locally and mounts directly to a Railway volume — no separate vector database service to manage.
 
-- 最终输出，质量要求最高
-- 需要整合全部上下文（claim、steelman、attacks、用户 Socratic 回答）写出有说服力的 refined argument
+`lru_cache(maxsize=1)` in `retriever.py` ensures the vector store is loaded only once on the first request, then reused for the lifetime of the process.
 
-### ChromaDB：零基础设施的本地向量库
-
-RAG 检索需要一个向量数据库。选型优先级：运维简单 > 检索质量 > 可扩展性（portfolio demo，不需要千亿级别）。
-
-ChromaDB 本地持久化，直接挂载到 Railway volume，不需要单独的向量数据库服务。`lru_cache(maxsize=1)` 保证向量库只在第一次请求时加载，之后复用同一实例。
-
-嵌入模型用 `text-embedding-3-small`：cost-efficient，对哲学/逻辑类文本检索质量够用。
+The embedding model is `text-embedding-3-small`: cost-efficient and adequate retrieval quality for philosophical and logical texts.
 
 ---
 
-## 三、状态设计
+## 3. State Design
 
-`DialecticaState` 是整个系统的核心数据结构：
+`DialecticaState` is the backbone of the entire system:
 
 ```python
 class DialecticaState(TypedDict):
-    original_claim: str       # 只写一次，永不覆盖
-    core_claim: str           # understand 节点写入
-    claim_assumptions: list[str]
-    steelman_text: str        # steelman 节点写入
-    steelman_sources: list[str]
-    attacks: list[str]        # attack 节点写入
-    attack_sources: list[str]
-    socratic_questions: list[str]  # interrogate 节点写入
-    user_responses: list[str]      # 用户输入，API 注入
-    synthesis: str            # synthesize 节点写入
-    argument_map: dict
+    # Input
+    original_claim: str           # Set once at session start, never overwritten
+    lang: str                     # "en" | "zh" — passed to every node for i18n
+
+    # Node outputs
+    core_claim: str               # understand: distilled single-sentence claim
+    claim_assumptions: list[str]  # understand: implicit assumptions
+    steelman_text: str            # steelman: strongest version of the claim
+    steelman_sources: list[str]   # steelman: RAG sources used
+    attacks: list[str]            # attack: counterarguments
+    attack_sources: list[str]     # attack: RAG + web sources
+    socratic_questions: list[str] # interrogate: exactly 3 questions
+    user_responses: list[str]     # injected via graph.update_state after pause
+    synthesis: str                # synthesize: final refined argument
+    argument_map: dict            # synthesize: structured breakdown
+
+    # Control flow
     current_node: str
+    round: int                    # Socratic round counter (max 2)
     awaiting_user: bool
     error: Optional[str]
 ```
 
-设计原则：**每个字段只由一个节点负责写入**。`original_claim` 设置后绝不覆盖，这是整个推理链的锚点。节点只读自己需要的字段，只写自己负责的字段，职责清晰。
+Design principle: **each field is written by exactly one node**. `original_claim` is the anchor — it is set at session creation and never touched again. The `lang` field propagates the language choice through every node so prompts can be localized. `argument_map` is validated with a Pydantic model then stored as a plain dict for JSON serialization.
 
-`argument_map` 用 Pydantic 模型 `ArgumentMap` 校验，最终 `.model_dump()` 成 dict 存入 state，便于 JSON 序列化。
-
----
-
-## 四、遇到的问题与解法
-
-### 问题 1：SSE 分隔符 CRLF 导致事件被吞
-
-**现象**：前端偶尔丢失事件，表现为某些 `node_end` 事件没有触发 UI 更新。
-
-**根因**：SSE 协议规定用 `\n\n` 分隔事件。`sse-starlette` 实际发送的是 `\r\n\r\n`（CRLF）。前端原始代码 `text.split('\n\n')` 无法正确切割含 `\r` 的字符串，每隔一个事件就有一半内容被混入下一个事件的 raw 字符串里，解析后 `data` 字段为空，被静默丢弃。
-
-**解法**：在 `readSSE.js` 里统一规范化：
-
-```javascript
-const normalized = rawText.replace(/\r\n/g, '\n')
-const events = normalized.split('\n\n')
-```
-
-放在 shared utility 里而不是各自修，之后 `ResponseForm` 复用同一个 `readSSE` 函数，不会再出现同类问题。
+Note: the field is `steelman_text`, not `steelman` — this was the actual name used throughout the codebase to avoid shadowing.
 
 ---
 
-### 问题 2：ChatPromptTemplate 把 JSON schema 里的 `{}` 当模板变量
+## 4. Configuration
 
-**现象**：`synthesize` 节点调用时抛出 `KeyError`：
-
-```
-KeyError: 'Input to ChatPromptTemplate is missing variables {'\n  "core_claim"'}'
-```
-
-**根因**：`SYNTHESIZE_SYSTEM` 里有一段 JSON schema 示例：
+`config.py` uses `pydantic-settings` `BaseSettings`:
 
 ```python
-"""
-Output this JSON:
-{
-  "core_claim": "...",
-  "refined_claim": "..."
-}
-"""
+class Settings(BaseSettings):
+    openai_api_key: str
+    tavily_api_key: str = ""
+    chroma_db_path: str = "./chroma_db"
+    default_model: str = "gpt-4o-mini"
+    synthesis_model: str = "gpt-4o"
+    embedding_model: str = "text-embedding-3-small"
+    max_rounds: int = 2
+    cors_origins_str: str = "https://odieyang.com,https://www.odieyang.com"
+
+    @property
+    def cors_origins(self) -> list[str]:
+        return [o.strip() for o in self.cors_origins_str.split(",")]
+
+    class Config:
+        env_file = ".env"
 ```
 
-Python 的 `str.format()` 调用时会把所有 `{...}` 解释为占位符，所以用了 `{{...}}` 双括号转义。但 `str.format()` 执行后双括号变成单括号，结果字符串里有裸露的 `{`。
+Two design decisions worth noting:
 
-`ChatPromptTemplate.from_messages()` 拿到这个字符串后**再次**做模板变量替换，把 `{\n  "core_claim"` 识别为一个变量名，`ainvoke` 时找不到这个 key，抛出 `KeyError`。
+**`cors_origins_str` instead of `cors_origins: list[str]`:** Pydantic-settings parses list fields from environment variables by treating the value as JSON. That means `CORS_ORIGINS=https://odieyang.com,https://www.odieyang.com` would raise a `JSONDecodeError` because it is not valid JSON. Storing it as a plain string and splitting on commas in a `@property` avoids this entirely.
 
-**解法**：绕开 `ChatPromptTemplate`，直接用 `SystemMessage` + `HumanMessage`：
-
-```python
-structured_llm = _llm(settings.synthesis_model).with_structured_output(SynthesizeOutput)
-messages = [
-    SystemMessage(content=SYNTHESIZE_SYSTEM),          # 原始字符串，不经过任何模板处理
-    HumanMessage(content=SYNTHESIZE_USER.format(...))  # 只对 user message 做 .format()
-]
-result = await structured_llm.ainvoke(messages)
-```
-
-`SYNTHESIZE_SYSTEM` 里的 JSON schema 无需 `{{}}` 转义，直接写 `{}`，因为它不再经过任何模板引擎。
+**`embedding_model` field:** This was missing from an early version of `Settings`, causing an `AttributeError` when `retriever.py` called `settings.embedding_model`. Adding it explicitly to the Settings class (with the correct default) makes it injectable via environment variable and testable.
 
 ---
 
-### 问题 3：向量库加载时找不到 OpenAI API key
+## 5. API Endpoints
 
-**现象**：RAG 检索偶尔抛出 `AuthenticationError`，但 `.env` 里 key 明明存在。
+### `POST /dialectica/start`
 
-**根因**：`ChromaDB` + `OpenAIEmbeddings` 初始化时，LangChain 默认从 `OPENAI_API_KEY` 环境变量读取 key。在某些部署环境下，环境变量加载顺序问题导致 `OpenAIEmbeddings()` 初始化时 key 还未注入。
+Starts a new session. Assigns a `session_id` (UUID) and a separate `thread_id` for the LangGraph checkpointer. The first SSE event is always `session` with the `session_id` so the frontend can store it before any nodes run.
 
-**解法**：在 `retriever.py` 的 `_get_vectorstore()` 里显式传入：
+**Request:**
+```json
+{ "claim": "Social media has made people more politically polarized.", "lang": "en" }
+```
+
+**SSE events emitted:**
+```
+event: session         data: {"session_id": "abc123"}
+event: node_start      data: {"node": "understand"}
+event: token           data: {"node": "understand", "token": "..."}
+event: node_end        data: {"node": "understand", "output": {...}}
+...
+event: awaiting_input  data: {"questions": ["...", "...", "..."]}
+```
+
+### `POST /dialectica/respond`
+
+Resumes the paused graph after the user submits Socratic answers.
+
+**Request:**
+```json
+{ "session_id": "abc123", "responses": ["answer 1", "answer 2", "answer 3"] }
+```
+
+Injects responses via `graph.update_state(...)`, then resumes with `astream_events(None, config=config)`. Streams the synthesize node's output, then emits `complete`.
+
+### `POST /dialectica/auto-respond`
+
+Generates all three Socratic responses at once, aligned to a `stance` ("defend", "concede", or "nuanced"). Non-streaming: calls `llm.ainvoke(...)` and returns three labeled SSE events (`response_1`, `response_2`, `response_3`) plus a `complete`. Reads session state directly from the MemorySaver via `_get_session_state()` — the frontend does not need to re-send context.
+
+### `POST /dialectica/auto-respond-one`
+
+Generates a single Socratic response for a specific question, with token-level streaming. Accepts an optional `perspective_hint`: when the user has selected a Tier 3 perspective, the hint's natural-language description (e.g. "argue as a utilitarian") is injected directly into the system prompt's `stance_instruction` field, overriding the default stance text.
+
+### `POST /dialectica/suggest-perspectives`
+
+Returns 3–4 contextually generated perspective options for a specific Socratic question (e.g. "from an empiricist standpoint", "from a historical angle"). Non-streaming JSON response. Perspectives are generated dynamically by the LLM based on the question and the full attack context — they are not a fixed enumeration.
+
+### `POST /admin/build-index`
+
+Protected by an `X-Admin-Key` header. Runs the RAG corpus ingestion script as a subprocess:
 
 ```python
-from ..config import settings
-embeddings = OpenAIEmbeddings(
-    model=settings.embedding_model,
-    api_key=settings.openai_api_key,  # 明确传入，不依赖环境变量自动发现
+subprocess.run(
+    ["python", "-m", "backend.app.rag.build_index"],
+    cwd="/app",
+    env={**os.environ, "PYTHONPATH": "/app"}
 )
 ```
 
----
+Running `build_index` as a module (`-m`) rather than a direct script call solves a relative import issue: when the script is executed directly as a file, Python does not recognize it as part of the `backend.app.rag` package, so `from ..config import settings` fails with an `ImportError`. The `-m` flag sets up the package context correctly.
 
-## 五、Auto-Response 子系统设计
+### `GET /health`
 
-Socratic 回答阶段加了三个辅助端点，设计思路是**渐进式辅助**：
-
-1. **`/auto-respond`**：一次生成 3 条回答，适合不想思考的用户。LLM 读取完整上下文（claim + attacks + questions），输出 JSON 数组，前端解析后填入三个 textarea。用 `await llm.ainvoke()` 而非流式，因为三条回答是原子结果。
-
-2. **`/auto-respond-one`**：针对单条问题的流式建议，适合想参与但需要启发的用户。Token 级别流式输出，直接打进 textarea，有"打字机"效果。接受 `perspective_hint` 参数，当用户从 Tier 3 选了视角后，把视角的自然语言描述（而不是 stance ID）注入 system prompt 里的 `stance_instruction`。
-
-3. **`/suggest-perspectives`**：为特定问题生成 3–4 个视角选项（"作为功利主义者"、"从历史角度"等）。非流式，返回 JSON。LLM 会根据 question 内容动态生成，而不是固定枚举，所以视角是上下文感知的。
-
-这三个端点都复用 `_get_session_state()` 从 MemorySaver 里读取当前会话的完整 state，不需要前端把所有上下文重新发送过来。
+Returns `{"status": "ok"}`. Used by Railway's healthcheck.
 
 ---
 
-## 六、总结
+## 6. ChromaDB and RAG Setup
 
-后端的设计核心是**把复杂性锁在正确的地方**：
+The vector store is initialized lazily and cached:
 
-- 流程复杂性交给 LangGraph 管理（节点顺序、状态传递、中断/恢复）
-- 输出格式复杂性交给 Pydantic 管理（`with_structured_output`）
-- 传输复杂性交给 SSE 管理（统一的事件流协议）
-- API 层保持薄：FastAPI 的每个端点只做"读 session → 调 graph/LLM → 吐 SSE"，不包含业务逻辑
+```python
+@lru_cache(maxsize=1)
+def _get_vectorstore() -> Chroma:
+    from ..config import settings
+    embeddings = OpenAIEmbeddings(
+        model=settings.embedding_model,
+        api_key=settings.openai_api_key,  # explicit — no reliance on env auto-discovery
+    )
+    return Chroma(
+        collection_name="dialectica_corpus",
+        embedding_function=embeddings,
+        persist_directory=str(CHROMA_DIR),
+    )
+```
+
+Passing `api_key` explicitly prevents an `AuthenticationError` that can appear in some deployment environments where `OPENAI_API_KEY` has not propagated to the environment by the time `OpenAIEmbeddings()` initializes.
+
+In production on Railway, `CHROMA_DB_PATH` is set to `/data/chroma_db`, which is a persistent volume that survives redeployments. The ingestion script (`build_index.py`) runs once via `/admin/build-index` after first deploy; subsequent deploys do not re-ingest.
+
+---
+
+## 7. Auto-Response Subsystem Design
+
+The three auto-response endpoints implement a tiered assistance model for the Socratic answering phase:
+
+**Tier 1 — Bulk fill (`/auto-respond`):** The user picks a stance and generates all three responses at once. Best for users who want to see the synthesis quickly. Atomic — no streaming needed since the three responses are a single indivisible result.
+
+**Tier 2 — Per-question streaming (`/auto-respond-one`):** Each textarea has an individual "Suggest" button that streams a response token-by-token into the field. Feels like collaborative writing rather than wholesale replacement. Users can edit the suggestion before submitting.
+
+**Tier 3 — Perspective selection (`/suggest-perspectives`):** On the first "Suggest" click when the textarea is empty, the frontend first fetches perspective options from this endpoint. The user picks a perspective, and that perspective's description is sent as `perspective_hint` to `/auto-respond-one`, guiding the LLM to answer from that specific angle.
+
+All three endpoints call `_get_session_state(session_id)` to read the current graph state from MemorySaver. This means the frontend only needs to pass `session_id` plus the current request parameters — it never has to re-transmit the full conversation context.
+
+---
+
+## 8. Bugs Fixed During Development
+
+### CORS origins JSON parse error
+
+**Symptom:** The server crashed on startup with a `JSONDecodeError` when `CORS_ORIGINS` was set as a comma-separated string in Railway environment variables.
+
+**Root cause:** `pydantic-settings` treats `list[str]` fields as JSON when reading from environment variables. A comma-separated string is not valid JSON.
+
+**Fix:** Changed `cors_origins: list[str]` to `cors_origins_str: str` with a `@property` that splits on commas. No behavior change, no JSON required.
+
+---
+
+### `embedding_model` missing from Settings
+
+**Symptom:** `AttributeError: 'Settings' object has no attribute 'embedding_model'` at retriever initialization.
+
+**Root cause:** `embedding_model` was never added to the `Settings` class. It was hard-coded in `retriever.py` instead.
+
+**Fix:** Added `embedding_model: str = "text-embedding-3-small"` to `Settings`. This makes it configurable via environment variable and eliminates the attribute error.
+
+---
+
+### `build_index` relative import failure
+
+**Symptom:** Running `python backend/app/rag/build_index.py` directly raised `ImportError: attempted relative import with no known parent package`.
+
+**Root cause:** The script uses `from ..config import settings`. Running it as a top-level file means Python sees no parent package, so relative imports fail.
+
+**Fix:** Changed the invocation to `python -m backend.app.rag.build_index` with `PYTHONPATH=/app`. The `-m` flag runs the file as part of its package, making relative imports work.
+
+---
+
+### `ChatPromptTemplate` treating JSON schema braces as template variables
+
+**Symptom:** `synthesize` node raised `KeyError: 'Input to ChatPromptTemplate is missing variables {"core_claim"}'`.
+
+**Root cause:** The `SYNTHESIZE_SYSTEM` prompt contained a JSON schema example with `{}` curly braces. `ChatPromptTemplate.from_messages()` interpreted these as Jinja/format-string placeholders and tried to resolve them at `.ainvoke()` time.
+
+**Fix:** Bypassed `ChatPromptTemplate` entirely in the synthesize node. Used `SystemMessage(content=SYNTHESIZE_SYSTEM)` and `HumanMessage(content=SYNTHESIZE_USER.format(...))` directly — the system message is never passed through any template engine, so its JSON schema braces are inert.
+
+---
+
+## 9. Design Summary
+
+The backend keeps complexity in the right places:
+
+- **LangGraph** owns flow complexity: node order, state transitions, interrupt/resume
+- **Pydantic** owns format complexity: structured output schemas enforce valid node outputs
+- **SSE** owns transport complexity: a single uniform event protocol from graph to browser
+- **FastAPI** stays thin: each endpoint does exactly "read session → call graph/LLM → emit SSE", with no business logic in the route handlers
