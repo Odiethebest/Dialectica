@@ -38,11 +38,11 @@ export const ZH_RANDOM_CLAIMS = [
 ]
 
 export const ZH_CATEGORIES = {
-  政治: { icon: '⚖️', color: '#8B7355' },
-  科技: { icon: '⚙️', color: '#6B8B9E' },
-  社会: { icon: '🏛️', color: '#7A8B6B' },
-  哲学: { icon: '∞',  color: '#8B6B7A' },
-  科学: { icon: '🔬', color: '#6B7A8B' },
+  政治: { icon: '⚖', color: '#8A1828' },
+  科技: { icon: '⚙', color: '#1A3460' },
+  社会: { icon: '◎', color: '#2A5A3A' },
+  哲学: { icon: '∞', color: '#6B4A20' },
+  科学: { icon: '◈', color: '#2A4A60' },
 }
 
 export const ZH_CLAIMS_BY_CATEGORY = {
