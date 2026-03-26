@@ -24,3 +24,4 @@ dist/
 
 # Project internals
 CLAUDE.md
+.claude/
