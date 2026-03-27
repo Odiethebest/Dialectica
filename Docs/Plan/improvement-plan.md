@@ -60,8 +60,8 @@
 
 **改进**
 - 明确“Single Source of Truth”：
-  - API/状态字段：`Docs/architecture/architecture-overview.md`
-  - 部署流程：`Docs/operations/deployment-guide.md`
+  - API/状态字段：`Docs/Arch/architecture-overview.md`
+  - 部署流程：`Docs/DevOps/deployment-guide.md`
   - Prompt 行为：`backend/app/graph/prompts.py`
 - 在每份文档顶部增加 `Last verified with commit`。
 

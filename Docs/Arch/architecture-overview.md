@@ -91,17 +91,17 @@ dialectica/
 │           └── randomClaims.js      # 24 EN example claims + category metadata
 │
 └── Docs/
-    ├── architecture/
+    ├── Arch/
     │   ├── architecture-overview.md  # Architecture + project structure (this file)
     │   ├── design-backend.md         # Backend design thinking + decisions
     │   ├── design-frontend.md        # Frontend design thinking + decisions
     │   └── rag-architecture.md       # RAG design and implementation
-    ├── operations/
+    ├── DevOps/
     │   └── deployment-guide.md       # Railway deployment and runtime setup
-    ├── planning/
+    ├── Plan/
     │   ├── project-roadmap.md        # Chronological build log
     │   └── improvement-plan.md       # Improvement backlog and priorities
-    └── specs/
+    └── Spec/
         ├── 01-UIUX.md                # Frontend design system spec
         ├── 02-Scroll.md              # Parchment SVG UI spec
         ├── 03-output-style-guide.md  # LLM output quality spec

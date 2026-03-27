@@ -72,7 +72,7 @@ Phase 3 (understand + steelman) was implemented in the same commit as Phase 4. T
 - `61dbc36` — *Add Phase 5 frontend: maroon/gold scholarly theme*
 - `58e05ff` — *Switch backend to OpenAI; fix SSE CRLF parsing bug*
 
-**Spec reference:** [`01-UIUX.md`](../specs/01-UIUX.md)
+**Spec reference:** [`01-UIUX.md`](../Spec/01-UIUX.md)
 
 **What was built (`61dbc36`):**
 - Full React 19 + Vite frontend scaffolded as part of `odieyang.com` at `/dialectica` route
@@ -106,18 +106,18 @@ Phase 3 (understand + steelman) was implemented in the same commit as Phase 4. T
 ## Phase 7 — Parchment UI + LLM Output Quality
 **Commit:** `14181c7` — *Add parchment SVG aesthetic and tighten LLM output quality*
 
-**Spec references:** [`02-Scroll.md`](../specs/02-Scroll.md), [`03-output-style-guide.md`](../specs/03-output-style-guide.md)
+**Spec references:** [`02-Scroll.md`](../Spec/02-Scroll.md), [`03-output-style-guide.md`](../Spec/03-output-style-guide.md)
 
 **What was built:**
 
-*Parchment UI (`../specs/02-Scroll.md`):*
+*Parchment UI (`../Spec/02-Scroll.md`):*
 - `parchmentPath.js`: generates irregular torn-paper SVG paths using 4-edge point arrays with quadratic Bezier curves and `Math.random()` seeded per render; bottom edge has highest roughness (most torn), top is nearly flat, sides are subtle
 - `ParchmentBlock.jsx`: wraps all dialogue blocks; during streaming shows plain colored `<div>` with left border; after streaming ends, fires `useEffect` → `requestAnimationFrame` → measures settled layout → generates SVG → triggers `parchment-in` fade-in animation
 - Type-specific fills: claim/understand (`#F3EDE4`), steelman (`#EDE0C4`), attack (dark maroon `#6B1020`, inverted text), socratic (`#FDF5E6`), synthesis (`#F0E8D4`)
 - SVG includes 5 faint horizontal guide lines (ruled parchment effect)
 - All 6 block components updated to use `ParchmentBlock`
 
-*Output quality (`../specs/03-output-style-guide.md`):*
+*Output quality (`../Spec/03-output-style-guide.md`):*
 - `_UNIVERSAL_STYLE` constant: rules for active voice, sentence length, no LLM filler phrases, numbered lists only when ordered
 - `_SELF_EDIT` constant: self-editing pass instructions injected into every node
 - All 5 node system prompts rewritten in `graph/prompts.py` with explicit good/bad examples, banned phrases, output constraints
@@ -128,7 +128,7 @@ Phase 3 (understand + steelman) was implemented in the same commit as Phase 4. T
 ## Phase 8 — Zero-Friction Entry
 **Commit:** `83843d5` — *Implement Zero-Friction entry: all 6 features*
 
-**Spec reference:** [`04-Zero-Friction.md`](../specs/04-Zero-Friction.md)
+**Spec reference:** [`04-Zero-Friction.md`](../Spec/04-Zero-Friction.md)
 
 **What was built:**
 - **Chips auto-submit:** clicking an example chip fills the textarea and immediately starts the session (300ms delay for visual feedback) — no manual "Begin" click required
@@ -146,7 +146,7 @@ Phase 3 (understand + steelman) was implemented in the same commit as Phase 4. T
 ## Phase 9 — Three-Tier Auto-Response
 **Commit:** `a8cb907` — *Implement three-tier auto-response system for Socratic Q&A*
 
-**Spec reference:** [`05-autoresponse.md`](../specs/05-autoresponse.md)
+**Spec reference:** [`05-autoresponse.md`](../Spec/05-autoresponse.md)
 
 **What was built:**
 
@@ -206,7 +206,7 @@ result = await structured_llm.ainvoke(messages)
 ---
 
 ## Phase 11 — EN/ZH Bilingual Support
-**Spec reference:** [`06-Chinese.md`](../specs/06-Chinese.md)
+**Spec reference:** [`06-Chinese.md`](../Spec/06-Chinese.md)
 
 **What was built:**
 
@@ -235,7 +235,7 @@ result = await structured_llm.ainvoke(messages)
 ---
 
 ## Phase 12 — Brand & Copyright
-**Spec reference:** [`07-Brand-Copyright.md`](../specs/07-Brand-Copyright.md)
+**Spec reference:** [`07-Brand-Copyright.md`](../Spec/07-Brand-Copyright.md)
 
 **What was built:**
 - **Navbar byline** (brand signal, always visible): `<span className="d-navbar-byline">` rendered directly below the wordmark in `.d-navbar-left` (column flex); 9px italic Georgia, gold2 color, `opacity: 0.8`; ZH variant: `作者：Odie Yang`; mobile: `letter-spacing` reduced from `0.12em` to `0.06em`
@@ -282,12 +282,12 @@ All phases complete and deployed. The full pipeline is live at `odieyang.com/dia
 ### Spec docs
 | File | Phase implemented |
 |---|---|
-| [`01-UIUX.md`](../specs/01-UIUX.md) | Phase 5 — Frontend |
-| [`02-Scroll.md`](../specs/02-Scroll.md) | Phase 7 — Parchment UI |
-| [`03-output-style-guide.md`](../specs/03-output-style-guide.md) | Phase 7 — Output quality |
-| [`04-Zero-Friction.md`](../specs/04-Zero-Friction.md) | Phase 8 — Zero-friction entry |
-| [`05-autoresponse.md`](../specs/05-autoresponse.md) | Phase 9 — Auto-response |
-| [`06-Chinese.md`](../specs/06-Chinese.md) | Phase 11 — EN/ZH bilingual |
-| [`07-Brand-Copyright.md`](../specs/07-Brand-Copyright.md) | Phase 12 — Brand & copyright |
-| [`design-backend.md`](../architecture/design-backend.md) | Reference — backend design thinking |
-| [`design-frontend.md`](../architecture/design-frontend.md) | Reference — frontend design thinking |
+| [`01-UIUX.md`](../Spec/01-UIUX.md) | Phase 5 — Frontend |
+| [`02-Scroll.md`](../Spec/02-Scroll.md) | Phase 7 — Parchment UI |
+| [`03-output-style-guide.md`](../Spec/03-output-style-guide.md) | Phase 7 — Output quality |
+| [`04-Zero-Friction.md`](../Spec/04-Zero-Friction.md) | Phase 8 — Zero-friction entry |
+| [`05-autoresponse.md`](../Spec/05-autoresponse.md) | Phase 9 — Auto-response |
+| [`06-Chinese.md`](../Spec/06-Chinese.md) | Phase 11 — EN/ZH bilingual |
+| [`07-Brand-Copyright.md`](../Spec/07-Brand-Copyright.md) | Phase 12 — Brand & copyright |
+| [`design-backend.md`](../Arch/design-backend.md) | Reference — backend design thinking |
+| [`design-frontend.md`](../Arch/design-frontend.md) | Reference — frontend design thinking |
