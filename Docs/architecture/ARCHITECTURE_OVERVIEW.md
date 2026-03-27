@@ -91,15 +91,22 @@ dialectica/
 │           └── randomClaims.js      # 24 EN example claims + category metadata
 │
 └── Docs/
-    ├── ROADMAP.md               # Chronological build log
-    ├── Arch.md                  # Architecture + project structure (this file)
-    ├── 01-UIUX.md               # Frontend design system spec
-    ├── 02-Scroll.md             # Parchment SVG UI spec
-    ├── 03-output-style-guide.md # LLM output quality spec
-    ├── 04-Zero-Friction.md      # Zero-friction entry spec
-    ├── 05-autoresponse.md       # Three-tier auto-response spec
-    ├── 06-Chinese.md            # EN/ZH bilingual spec
-    ├── 07-Brand-Copyright.md    # Navbar byline + footer spec
-    ├── design-backend.md        # Backend design thinking + decisions
-    └── design-frontend.md       # Frontend design thinking + decisions
+    ├── architecture/
+    │   ├── ARCHITECTURE_OVERVIEW.md  # Architecture + project structure (this file)
+    │   ├── DESIGN_BACKEND.md         # Backend design thinking + decisions
+    │   ├── DESIGN_FRONTEND.md        # Frontend design thinking + decisions
+    │   └── RAG_ARCHITECTURE.md       # RAG design and implementation
+    ├── operations/
+    │   └── DEPLOYMENT_GUIDE.md       # Railway deployment and runtime setup
+    ├── planning/
+    │   ├── PROJECT_ROADMAP.md        # Chronological build log
+    │   └── IMPROVEMENT_PLAN.md       # Improvement backlog and priorities
+    └── specs/
+        ├── 01-UIUX.md                # Frontend design system spec
+        ├── 02-Scroll.md              # Parchment SVG UI spec
+        ├── 03-output-style-guide.md  # LLM output quality spec
+        ├── 04-Zero-Friction.md       # Zero-friction entry spec
+        ├── 05-autoresponse.md        # Three-tier auto-response spec
+        ├── 06-Chinese.md             # EN/ZH bilingual spec
+        └── 07-Brand-Copyright.md     # Navbar byline + footer spec
 ```

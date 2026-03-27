@@ -26,7 +26,7 @@ The system runs through five stages:
 
 ## Architecture
 
-See [Docs/Arch.md](Docs/Arch.md) for the full system diagram and project structure.
+See [Docs/architecture/ARCHITECTURE_OVERVIEW.md](Docs/architecture/ARCHITECTURE_OVERVIEW.md) for the full system diagram and project structure.
 
 ---
 
@@ -99,8 +99,8 @@ The app will be available at `http://localhost:5173`.
 
 ## Design Notes
 
-- [Docs/design-backend.md](Docs/design-backend.md) — Backend design thinking: LangGraph, FastAPI, SSE, LLM tiering, bug post-mortems
-- [Docs/design-frontend.md](Docs/design-frontend.md) — Frontend design thinking: SSE handling, state machine, parchment render, zero-friction UX
+- [Docs/architecture/DESIGN_BACKEND.md](Docs/architecture/DESIGN_BACKEND.md) — Backend design thinking: LangGraph, FastAPI, SSE, LLM tiering, bug post-mortems
+- [Docs/architecture/DESIGN_FRONTEND.md](Docs/architecture/DESIGN_FRONTEND.md) — Frontend design thinking: SSE handling, state machine, parchment render, zero-friction UX
 
 ---
 
