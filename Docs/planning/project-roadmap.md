@@ -289,5 +289,5 @@ All phases complete and deployed. The full pipeline is live at `odieyang.com/dia
 | [`05-autoresponse.md`](../specs/05-autoresponse.md) | Phase 9 — Auto-response |
 | [`06-Chinese.md`](../specs/06-Chinese.md) | Phase 11 — EN/ZH bilingual |
 | [`07-Brand-Copyright.md`](../specs/07-Brand-Copyright.md) | Phase 12 — Brand & copyright |
-| [`DESIGN_BACKEND.md`](../architecture/DESIGN_BACKEND.md) | Reference — backend design thinking |
-| [`DESIGN_FRONTEND.md`](../architecture/DESIGN_FRONTEND.md) | Reference — frontend design thinking |
+| [`design-backend.md`](../architecture/design-backend.md) | Reference — backend design thinking |
+| [`design-frontend.md`](../architecture/design-frontend.md) | Reference — frontend design thinking |

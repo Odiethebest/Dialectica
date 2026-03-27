@@ -92,15 +92,15 @@ dialectica/
 │
 └── Docs/
     ├── architecture/
-    │   ├── ARCHITECTURE_OVERVIEW.md  # Architecture + project structure (this file)
-    │   ├── DESIGN_BACKEND.md         # Backend design thinking + decisions
-    │   ├── DESIGN_FRONTEND.md        # Frontend design thinking + decisions
-    │   └── RAG_ARCHITECTURE.md       # RAG design and implementation
+    │   ├── architecture-overview.md  # Architecture + project structure (this file)
+    │   ├── design-backend.md         # Backend design thinking + decisions
+    │   ├── design-frontend.md        # Frontend design thinking + decisions
+    │   └── rag-architecture.md       # RAG design and implementation
     ├── operations/
-    │   └── DEPLOYMENT_GUIDE.md       # Railway deployment and runtime setup
+    │   └── deployment-guide.md       # Railway deployment and runtime setup
     ├── planning/
-    │   ├── PROJECT_ROADMAP.md        # Chronological build log
-    │   └── IMPROVEMENT_PLAN.md       # Improvement backlog and priorities
+    │   ├── project-roadmap.md        # Chronological build log
+    │   └── improvement-plan.md       # Improvement backlog and priorities
     └── specs/
         ├── 01-UIUX.md                # Frontend design system spec
         ├── 02-Scroll.md              # Parchment SVG UI spec
