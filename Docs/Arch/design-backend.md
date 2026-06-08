@@ -175,7 +175,7 @@ Injects responses via `graph.update_state(...)`, then resumes with `astream_even
 
 ### `POST /dialectica/auto-respond`
 
-Generates all three Socratic responses at once, aligned to a `stance` ("defend", "concede", or "nuanced"). Non-streaming: calls `llm.ainvoke(...)` and returns three labeled SSE events (`response_1`, `response_2`, `response_3`) plus a `complete`. Reads session state directly from the MemorySaver via `_get_session_state()` — the frontend does not need to re-send context.
+Generates all three Socratic responses at once, aligned to a `stance` ("defend", "concede", or "nuanced"). The LLM call itself is a single non-streaming `llm.ainvoke(...)` returning a JSON array, but the endpoint still uses SSE so it can emit three labeled events (`response_1`, `response_2`, `response_3`) plus a `complete`. Reads session state directly from the MemorySaver via `_get_session_state()` — the frontend does not need to re-send context.
 
 ### `POST /dialectica/auto-respond-one`
 
@@ -183,7 +183,7 @@ Generates a single Socratic response for a specific question, with token-level s
 
 ### `POST /dialectica/suggest-perspectives`
 
-Returns 3–4 contextually generated perspective options for a specific Socratic question (e.g. "from an empiricist standpoint", "from a historical angle"). Non-streaming JSON response. Perspectives are generated dynamically by the LLM based on the question and the full attack context — they are not a fixed enumeration.
+Returns exactly 3 contextually generated perspective options for a specific Socratic question. The prompt enforces three fixed IDs — `push_back`, `reframe`, `concede` — and the LLM fills the `label` and `hint` fields per question and per attack context. Non-streaming JSON response.
 
 ### `POST /admin/build-index`
 

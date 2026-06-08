@@ -2,6 +2,12 @@
 
 前后端合并部署到 Railway 单个服务，FastAPI 同时承担 API 和静态文件服务，ChromaDB 挂载 Railway 持久化卷。
 
+> **以代码为准的几点修订**（本文档原为部署设计稿，下面是与仓库当前真实状态的对齐点）：
+> - 实际 `Dockerfile`（仓库根目录）是**单阶段** `python:3.11-slim`，**不在容器内构建前端**——`frontend/dist` 由 CI / 本地预先 `npm run build`，再 COPY 进镜像（见下方第三步实际示例）。
+> - 实际 `backend/app/config.py` 用的是 **`pydantic-settings.BaseSettings`**，不是原文档示例里的散装 `os.getenv()`。
+> - 重建 RAG 索引的命令是 `python -m backend.app.rag.build_index`（必须用 `-m` 因为脚本里有相对 import），不是直接 `python backend/rag/build_index.py`。
+> - `frontend/package.json` 仍登记着 `react-router-dom`，但代码中未使用,SPA 路由由 FastAPI 的 catch-all `/{full_path:path}` 返回 `index.html` 实现。
+
 ---
 
 ## 最终架构
@@ -183,7 +189,15 @@ PORT            = int(os.getenv("PORT", "8000"))
 
 ```bash
 # Railway Dashboard → Service → Shell
-python backend/rag/build_index.py
+# 必须用 -m 调用，否则脚本内的 `from ..config import settings` 相对 import 会报 ImportError
+python -m backend.app.rag.build_index
+```
+
+实际生产更常用的做法是从外部触发管理端点(`X-Admin-Key` 鉴权)：
+
+```bash
+curl -X POST https://<railway-host>/admin/build-index \
+  -H "X-Admin-Key: $ADMIN_KEY"
 ```
 
 构建完成后 `/data/chroma_db` 目录会持久化，重新部署不会丢失。
@@ -293,7 +307,7 @@ railway up
 
 # 5. 部署完成后，通过 Shell 构建知识库（只需一次）
 railway shell
-python backend/rag/build_index.py
+python -m backend.app.rag.build_index
 exit
 ```
 

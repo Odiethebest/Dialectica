@@ -37,10 +37,10 @@ See [Docs/Arch/architecture-overview.md](Docs/Arch/architecture-overview.md) for
 | Agent Orchestration | LangGraph (stateful multi-node graph) |
 | LLM | OpenAI GPT-4o / GPT-4o-mini |
 | RAG Knowledge Base | LangChain + ChromaDB |
-| Tool Calling | Tavily Search API, Wikipedia |
+| Tool Calling | Tavily Search API (Wikipedia helper exists but is not wired into the graph) |
 | Backend | FastAPI + Server-Sent Events |
-| Frontend | React 19 + Vite |
-| Deployment | Railway (backend), Cloudflare Pages (frontend) |
+| Frontend | React 19 + Vite (served as static `dist` from the same FastAPI container) |
+| Deployment | Single Docker image on Railway (FastAPI serves API + SPA) |
 
 ---
 

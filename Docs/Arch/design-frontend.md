@@ -12,9 +12,9 @@ The frontend had three distinct challenges:
 
 ## 2. Technical Decisions
 
-### React 19 + Vite: Embedded in Existing Site
+### React 19 + Vite: Single-Page App, Served by the Backend
 
-Dialectica is a route (`/dialectica`) inside the existing `odieyang.com` React + Vite project — not a separate deployment. No new framework was introduced. This means no Next.js, no global state library. All session state lives in the `useDialectica` hook; components are purely presentational (props in, events out).
+The frontend is a standalone Vite SPA whose `dist/` is bundled into the backend Docker image and served by FastAPI (`app.mount("/assets", ...)` plus an SPA fallback that returns `index.html` for any non-API path). `react-router-dom` is listed in `package.json` but **not used** — `main.jsx` renders `<App />` directly, and `App` swaps between idle / active views based on a `mode` state. No global state library; all session state lives in the `useDialectica` hook, and components are purely presentational (props in, events out).
 
 ### `useDialectica`: Single State Source
 
@@ -85,8 +85,8 @@ The `\r\n → \n` normalization is applied at decode time, before the buffer is 
 ## 3. Component Structure
 
 ```
-src/App.jsx                                   # Root: holds claim + lang state, routes modes
-src/pages/ (Dialectica is a route in App)
+src/App.jsx                                   # Root: holds claim + lang state, switches idle/active by `mode`
+src/main.jsx                                  # Renders <App /> directly — no router
 src/hooks/useDialectica.js                    # All SSE + session state
 src/hooks/useSpeechInput.js                   # Web Speech API wrapper
 src/components/
@@ -221,7 +221,7 @@ The Socratic answering phase is where users most commonly stall — three philos
 
 **Tier 2 — Per-question streaming suggestion:** Each textarea has a "Suggest →" button. Clicking it calls `/dialectica/auto-respond-one`, which streams the response token-by-token directly into that textarea. The user can modify the text before submitting.
 
-**Tier 3 — Perspective picker:** On the first "Suggest →" click when the textarea is empty and no perspective has been chosen, the frontend first calls `/dialectica/suggest-perspectives`, receives 3–4 contextually generated perspective options, and presents them as a small picker. Once the user selects a perspective, its description is passed as `perspective_hint` to `/dialectica/auto-respond-one`, and the LLM answers from that angle.
+**Tier 3 — Perspective picker:** On the first "Suggest →" click when the textarea is empty and no perspective has been chosen, the frontend first calls `/dialectica/suggest-perspectives`, receives exactly 3 contextually generated perspective options (the prompt enforces three fixed IDs: `push_back` / `reframe` / `concede`), and presents them as a small picker. Once the user selects a perspective, its description is passed as `perspective_hint` to `/dialectica/auto-respond-one`, and the LLM answers from that angle.
 
 **State isolation:** `ResponseForm` manages its own textarea values, `suggesting` loading state, `perspectives` list, and `selectedPersp` per question. The parent component (`DialogueThread`) only sees the final responses when the user clicks Submit — it does not re-render on every keystroke. This was a deliberate trade-off: `ResponseForm` is treated as an uncontrolled-style form that only surfaces its data at submission time, keeping the parent's render tree stable during typing.
 

@@ -28,8 +28,7 @@ User Input (claim / draft / thesis)
    FastAPI (SSE stream)
         │
         ▼
-   React Frontend
-   odieyang.com/dialectica
+   React Frontend (Vite `dist`, served by FastAPI in the same Docker image on Railway)
 ```
 
 Each node in the graph maintains shared state — the original claim, retrieved evidence, and Socratic Q&A history — so the final synthesis has full context of the entire adversarial dialogue.
@@ -53,8 +52,8 @@ dialectica/
 │   │   │   ├── retriever.py     # ChromaDB retrieval logic
 │   │   │   └── build_index.py   # One-time corpus ingestion
 │   │   └── tools/
-│   │       ├── search.py        # Tavily web search tool
-│   │       └── wiki.py          # Wikipedia fetch tool
+│   │       ├── search.py        # Tavily web search tool (called in attack node)
+│   │       └── wiki.py          # Wikipedia fetch helper (defined but not wired into the graph)
 │   ├── data/
 │   │   └── corpus/              # Raw source texts for RAG ingestion
 │   └── requirements.txt
