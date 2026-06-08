@@ -75,7 +75,7 @@ Phase 3 (understand + steelman) was implemented in the same commit as Phase 4. T
 **Spec reference:** [`01-UIUX.md`](../Spec/01-UIUX.md)
 
 **What was built (`61dbc36`):**
-- Full React 19 + Vite frontend scaffolded as part of `odieyang.com` at `/dialectica` route
+- Full React 19 + Vite frontend scaffolded as a standalone SPA (no router; `main.jsx` renders `<App />` directly)
 - Design system: maroon (`#6B1020`) / gold (`#C9A84C`) / parchment (`#F3EDE4`) palette defined as CSS custom properties; `--d-serif` (Playfair Display) + `--d-sans` (Inter) type stack
 - `useDialectica` hook: manages all state (`mode`, `currentNode`, `sessionId`, all node outputs), handles SSE event stream from `/dialectica/start` and `/dialectica/respond`
 - `ClaimInput`: textarea with 3 example chips (auto-submit on click), "Begin ↗" button
@@ -162,7 +162,7 @@ Phase 3 (understand + steelman) was implemented in the same commit as Phase 4. T
 
 *Tier 3 — Dynamic perspective picker:*
 - First click on "Suggest →" (when textarea is empty and no perspective selected) calls `POST /dialectica/suggest-perspectives`
-- Backend generates 3–4 dynamically appropriate perspectives for that specific question (e.g., "As a pragmatist", "From a historical lens")
+- Backend returns exactly 3 perspectives with fixed IDs (`push_back` / `reframe` / `concede`); the LLM fills the question-specific `label` and `hint` text
 - Inline picker appears; selecting a perspective calls Tier 2 with the perspective as `perspective_hint`
 - Subsequent regenerate clicks reuse the previously selected perspective automatically
 

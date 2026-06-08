@@ -50,15 +50,15 @@ Before the response form, the user picks their stance. Then one click generates 
   "stance": "nuanced"  # "defend" | "concede" | "nuanced"
 }
 
-# Response: SSE stream, one event per question
+# Response: SSE stream, one event per question (actual data shape: { index, text })
 event: response_1
-data: {"question": "I", "text": "Even granting that polarization..."}
+data: {"index": 0, "text": "Even granting that polarization..."}
 
 event: response_2
-data: {"question": "II", "text": "The evidence I'd point to is..."}
+data: {"index": 1, "text": "The evidence I'd point to is..."}
 
 event: response_3
-data: {"question": "III", "text": "Polarization isn't inherently..."}
+data: {"index": 2, "text": "Polarization isn't inherently..."}
 
 event: complete
 data: {}
@@ -366,7 +366,7 @@ function ResponseTextarea({ index, question, value, onChange, sessionId, stance 
 
 ### Concept
 
-When a user clicks "Suggest →", instead of immediately generating, a small inline picker appears with 2-3 perspective options specific to that question. User picks one, then generation fires.
+When a user clicks "Suggest →", instead of immediately generating, a small inline picker appears with exactly 3 perspective options (fixed IDs `push_back` / `reframe` / `concede`, with question-specific `label` and `hint` text). User picks one, then generation fires.
 
 ```
 ┌── Suggest as: ─────────────────────────────────┐
@@ -407,7 +407,7 @@ When a user clicks "Suggest →", instead of immediately generating, a small inl
 }
 ```
 
-The LLM generates these 3 perspective options dynamically based on the specific question and the attacks. They are not hardcoded.
+The 3 perspective IDs (`push_back` / `reframe` / `concede`) are fixed by the prompt schema; the LLM fills in the question-specific `label` and `hint` per call based on the question and the attacks.
 
 ### Frontend
 
