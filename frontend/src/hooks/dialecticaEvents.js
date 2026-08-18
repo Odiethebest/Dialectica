@@ -1,3 +1,7 @@
+// Explicit extension: this module is unit-tested with plain node, whose ESM
+// resolver does not do Vite's extensionless lookup.
+import { readSSE } from '../utils/readSSE.js'
+
 export const INITIAL = {
   mode: 'idle',           // idle | streaming | awaiting_input | complete | error
   currentNode: null,      // understand | steelman | attack | interrogate | synthesize
@@ -67,4 +71,25 @@ export function reduceEvent(type, data = {}) {
     default:
       return null
   }
+}
+
+/**
+ * Drain an SSE response into state patches.
+ *
+ * `isCancelled` is checked before every patch so a run that has been superseded
+ * stops writing. Without it, clicking "New argument" mid-pipeline left the old
+ * stream patching the fresh state — its next node_start set mode back to
+ * 'streaming' and dragged the UI out of the idle screen into the previous run.
+ *
+ * Returns { terminal, cancelled }.
+ */
+export async function drainStream(response, { onPatch, isCancelled = () => false }) {
+  let terminal = false
+  for await (const { type, data } of readSSE(response)) {
+    if (isCancelled()) return { terminal, cancelled: true }
+    const update = reduceEvent(type, data)
+    if (update) onPatch(update)
+    if (TERMINAL_EVENTS.has(type)) terminal = true
+  }
+  return { terminal, cancelled: false }
 }

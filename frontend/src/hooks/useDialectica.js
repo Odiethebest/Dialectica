@@ -1,43 +1,57 @@
 import { useState, useRef, useCallback } from 'react'
-import { readSSE } from '../utils/readSSE'
-import { INITIAL, TERMINAL_EVENTS, reduceEvent } from './dialecticaEvents'
+import { INITIAL, drainStream } from './dialecticaEvents'
 
 export function useDialectica() {
   const [state, setState] = useState(INITIAL)
   const sessionIdRef = useRef(null)
+  const abortRef = useRef(null)
+  const runIdRef = useRef(0)
 
   const patch = (updates) => setState(s => ({ ...s, ...updates }))
 
-  /** Returns true if the stream ended in a known terminal state. */
-  const processStream = useCallback(async (response) => {
-    let sawTerminal = false
-    for await (const { type, data } of readSSE(response)) {
-      if (type === 'session') sessionIdRef.current = data.session_id
-      const update = reduceEvent(type, data)
-      if (update) patch(update)
-      if (TERMINAL_EVENTS.has(type)) sawTerminal = true
-    }
-    return sawTerminal
+  /**
+   * Abort whatever is in flight and claim the next run id. "New argument" is
+   * offered throughout the 20-40s pipeline, so an old run being left to finish
+   * was the normal case, not an edge case.
+   */
+  const supersede = useCallback(() => {
+    abortRef.current?.abort()
+    abortRef.current = null
+    runIdRef.current += 1
+    return runIdRef.current
   }, [])
 
-  // A non-2xx response body is not SSE, so readSSE yields nothing and the loop
-  // exits immediately. Without these two guards `mode` stayed 'streaming' and the
-  // pipeline spun forever with no message — the usual trigger being a 502 while
-  // Railway redeploys.
   const run = useCallback(async (url, body, pending) => {
+    const runId = supersede()
+    const controller = new AbortController()
+    abortRef.current = controller
     patch({ ...pending, error: null })
+
     try {
       const res = await fetch(url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
+        signal: controller.signal,
       })
+      // A non-2xx body is not SSE, so the reader yields nothing and the loop ends
+      // at once. Without this the UI stayed on 'streaming' with no message.
       if (!res.ok) throw new Error(`Server error (${res.status})`)
-      if (!await processStream(res)) throw new Error('Connection closed before the pipeline finished.')
+
+      const { terminal, cancelled } = await drainStream(res, {
+        onPatch: (update) => {
+          if (update.sessionId) sessionIdRef.current = update.sessionId
+          patch(update)
+        },
+        isCancelled: () => runIdRef.current !== runId,
+      })
+      if (cancelled) return
+      if (!terminal) throw new Error('Connection closed before the pipeline finished.')
     } catch (err) {
+      if (controller.signal.aborted || runIdRef.current !== runId) return
       patch({ mode: 'error', currentNode: null, error: err.message })
     }
-  }, [processStream])
+  }, [supersede])
 
   const startSession = useCallback((claim, lang = 'en') =>
     run('/dialectica/start', { claim, lang }, { mode: 'streaming', currentNode: null }), [run])
@@ -58,9 +72,10 @@ export function useDialectica() {
   }, [])
 
   const reset = useCallback(() => {
+    supersede()
     sessionIdRef.current = null
     setState(INITIAL)
-  }, [])
+  }, [supersede])
 
   return { ...state, startSession, submitResponses, setUserResponse, reset }
 }
