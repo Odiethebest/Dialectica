@@ -258,7 +258,6 @@ body {
 
 .d-textarea:focus { border-color: var(--d-gold2); }
 
-.d-textarea.flash-error { border-color: var(--d-maroon); }
 
 /* ── Chips ────────────────────────────────────────────────────────────────── */
 

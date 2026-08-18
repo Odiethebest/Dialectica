@@ -16,7 +16,6 @@ from .prompts import get_prompt
 from ..config import settings
 from ..rag.retriever import retrieve
 from ..tools.search import tavily_search
-from ..tools.wiki import wiki_fetch
 
 logger = logging.getLogger(__name__)
 

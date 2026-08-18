@@ -6,7 +6,7 @@ const ROMAN = ['I', 'II', 'III']
 
 // ── ResponseTextarea (Tier 2 + Tier 3) ────────────────────────────────────────
 
-function ResponseTextarea({ index, question, value, onChange, sessionId, stance, lang }) {
+function ResponseTextarea({ index, value, onChange, sessionId, stance, lang }) {
   const [suggesting, setSuggesting] = useState(false)
   const [showPerspectives, setShowPerspectives] = useState(false)
   const [perspectives, setPerspectives] = useState([])
@@ -144,7 +144,6 @@ export default function ResponseForm({ questions, sessionId, onSubmit, lang = 'e
   const [responses, setResponses] = useState(['', '', ''])
   const [autoFilling, setAutoFilling] = useState(false)
   const [autoFillError, setAutoFillError] = useState(null)
-  const [errors, setErrors] = useState([false, false, false])
 
   const STANCES = [
     { id: 'defend',  label: t(lang, 'stanceDefend')  },
@@ -186,12 +185,7 @@ export default function ResponseForm({ questions, sessionId, onSubmit, lang = 'e
   }
 
   const handleSubmit = () => {
-    const newErrors = responses.map(r => !r.trim())
-    if (newErrors.some(Boolean)) {
-      setErrors(newErrors)
-      setTimeout(() => setErrors([false, false, false]), 400)
-      return
-    }
+    if (responses.some(r => !r.trim())) return
     onSubmit(responses)
   }
 
@@ -223,11 +217,10 @@ export default function ResponseForm({ questions, sessionId, onSubmit, lang = 'e
       {autoFillError && <p className="d-autofill-error">{autoFillError}</p>}
 
       {/* Tier 2 + 3 — Per-question textareas */}
-      {questions.map((q, i) => (
+      {questions.map((_, i) => (
         <ResponseTextarea
           key={i}
           index={i}
-          question={q}
           value={responses[i]}
           onChange={(val) => setResponse(i, val)}
           sessionId={sessionId}
