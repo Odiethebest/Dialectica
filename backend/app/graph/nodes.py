@@ -64,6 +64,22 @@ class SynthesizeOutput(BaseModel):
 
 # ── Evidence formatting ──────────────────────────────────────────────────────
 
+def _format_rag_context(docs) -> str:
+    """
+    Render retrieved chunks, one entry per citation. A section that splits into
+    several chunks can otherwise occupy every retrieval slot, which costs the
+    model variety without telling it anything new.
+    """
+    seen, parts = set(), []
+    for d in docs:
+        cite = d.metadata.get("citation") or d.metadata.get("source", "Source")
+        if cite in seen:
+            continue
+        seen.add(cite)
+        parts.append(f"[{cite}]\n{d.page_content}")
+    return "\n\n".join(parts) if parts else "No references retrieved."
+
+
 def _format_web_context(results: list[dict]) -> str:
     """
     Render Tavily results for a prompt. The URL is included: it is what lets the
@@ -136,11 +152,8 @@ async def steelman(state: DialecticaState) -> dict:
         system_prompt, user_prompt = get_prompt("steelman", lang)
 
         # RAG retrieval — argumentation/epistemology framing, not empirical support
-        docs = retrieve(state["core_claim"], k=3)
-        rag_context = "\n\n".join(
-            f"[{doc.metadata.get('citation') or doc.metadata.get('source', 'Source')}]\n{doc.page_content}"
-            for doc in docs
-        )
+        docs = retrieve(state["core_claim"], k=5)
+        rag_context = _format_rag_context(docs)
 
         # Web search — real supporting evidence. The corpus is philosophy of
         # argument, so for a claim about the world it grounds nothing, and the node
@@ -181,11 +194,17 @@ async def attack(state: DialecticaState) -> dict:
 
         # RAG retrieval — search for counterarguments in philosophical corpus
         rag_query = f"counterargument against: {state['core_claim']}"
-        docs = retrieve(rag_query, k=3)
-        rag_context = "\n\n".join(
-            f"[{doc.metadata.get('citation') or doc.metadata.get('source', 'Source')}]\n{doc.page_content}"
-            for doc in docs
+        docs = retrieve(rag_query, k=5)
+        # The logical channel has to name a fallacy from the corpus, but a general
+        # query is dominated by the long-form sections and rarely returns one.
+        # Pull candidates straight from the fallacy taxonomy so the constraint is
+        # satisfiable instead of pushing the model to recall a name on its own.
+        docs += retrieve(
+            f"fallacy in the reasoning: {state['core_claim']}",
+            k=3,
+            where={"type": "fallacy"},
         )
+        rag_context = _format_rag_context(docs)
 
         # Web search via Tavily
         web_results = tavily_search(f"criticism evidence against: {state['core_claim']}", max_results=3)

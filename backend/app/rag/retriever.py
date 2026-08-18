@@ -38,15 +38,19 @@ def _get_vectorstore() -> Chroma:
     )
 
 
-def retrieve(query: str, k: int = 3) -> list[Document]:
+def retrieve(query: str, k: int = 3, where: dict | None = None) -> list[Document]:
     """
     Return the top-k most relevant documents for the given query.
 
+    `where` filters on chunk metadata, e.g. {"type": "fallacy"} to search only the
+    fallacy taxonomy. A general query rarely surfaces a named fallacy on its own,
+    because the long-form sections dominate on similarity.
+
     Each Document has:
       - page_content: the text chunk
-      - metadata: {"source": str, "type": str, ...}
+      - metadata: {"source": str, "type": str, "citation": str, ...}
     """
     vectorstore = _get_vectorstore()
-    results = vectorstore.similarity_search(query, k=k)
+    results = vectorstore.similarity_search(query, k=k, filter=where)
     logger.debug("Retrieved %d docs for query: %s", len(results), query[:80])
     return results

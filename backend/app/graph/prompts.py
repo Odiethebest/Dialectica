@@ -123,16 +123,36 @@ CITING A SOURCE — NON-NEGOTIABLE:
 - Never name a source absent from the evidence, and never invent an author, year
   or title the evidence does not state.
 - attack_urls: one entry per attack, in the same order. Copy the exact URL of the
-  web result backing that attack, or leave an empty string when the attack rests
-  on the philosophy references or on reasoning alone.
+  web result backing that attack. Channels II and III normally have no URL —
+  leave those empty.
 
 ATTACK — ADDITIONAL RULES:
 
 - Each attack opens with the counterevidence or counterexample directly. No setup sentence.
 - Maximum 2 sentences per attack. The second sentence is the citation or implication.
 - Sound like a cross-examination, not a literature review.
-- Each attack must target a different weakness: one factual, one logical, one scope/definition.
 - Never soften an attack with "however, the original claim has merit..." — that belongs in Synthesis.
+
+ONE CHANNEL PER ATTACK — the three attacks must not all be empirical:
+
+  I.   Factual. Drawn from the web results. Cite the paper, report or article and
+       put its URL in attack_urls.
+  II.  Logical. Drawn from the philosophy references. Name the fallacy or the
+       principle the argument breaks, using that reference's own label, e.g.
+       [Logical fallacy — Post Hoc Ergo Propter Hoc] or
+       [Argumentation Theory — Burden of proof]. No URL.
+  III. Scope or definition. Attack what the claim's terms let in or leave out.
+       Use a philosophy reference if one fits; otherwise label it
+       [On the claim's own terms] and cite nothing.
+
+Source shapes, one per channel:
+  I.   [<publication or author, from the evidence> — "<title, from the evidence>"]
+  II.  [Logical fallacy — <name>]   or   [<Work> — <Section>]
+  III. [On the claim's own terms]
+
+Use only labels that appear in the evidence below. If a channel has nothing
+usable, say so in that attack's source rather than borrowing from another
+channel or inventing a reference.
 
 Good example — note the shape of the source, not its contents:
 [<publication or author, from the evidence> — "<title, exactly as the evidence gives it>"] Polarization rose fastest among Americans over 65, the demographic least likely to use social media. That inverts the exposure gradient the claim depends on.
@@ -440,10 +460,27 @@ ZH_ATTACK_SYSTEM = """\
 - 每条反驳直接以反证或反例开头，不要铺垫句。
 - 每条最多 2 句：第一句是反驳，第二句是来源或推论。
 - 语气像交叉质询，而非文献综述。
-- 三条反驳分别针对：事实层面、逻辑层面、定义/范围层面。
 - 不要用「然而，原始主张也有其合理性……」来软化攻击。
 - 使用全角标点：（）「」。
 - 用中文回答。
+
+每条反驳走一个渠道——三条不能全是经验证据：
+
+  一、事实层面。取自网络搜索结果。写出论文/报告/文章，并把 URL 放进 attack_urls。
+  二、逻辑层面。取自哲学参考资料。指出该论证触犯的谬误或原则，
+      直接使用该资料自带的标签，例如
+      [Logical fallacy — Post Hoc Ergo Propter Hoc] 或
+      [Argumentation Theory — Burden of proof]。不带 URL。
+  三、范围/定义层面。攻击主张的用词放进了什么、排除了什么。
+      若有合适的哲学参考资料就用；否则标为 [就主张自身的措辞而言]，不引任何来源。
+
+三个渠道的来源写法：
+  一、[<证据中的出版方或作者>——《<证据中的标题>》]
+  二、[Logical fallacy — <名称>]   或   [<作品> — <章节>]
+  三、[就主张自身的措辞而言]
+
+只能使用下方证据中出现过的标签。若某个渠道没有可用材料，就在该条的来源里说明，
+不要挪用其他渠道的来源，也不要编造参考资料。
 
 来源标注——不可违反：
 
