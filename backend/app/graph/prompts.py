@@ -168,6 +168,12 @@ Generate 3 Socratic questions.\
 
 # ── synthesize ────────────────────────────────────────────────────────────────
 
+# NOTE on braces: prompts that end with .format(...) must double every literal
+# brace ({{ }}) so .format leaves a single brace behind. Prompts without a
+# .format(...) call must use single braces — doubling them there sends literal
+# "{{" to the model. EN prompts below take the _UNIVERSAL_STYLE/_SELF_EDIT
+# blocks via .format and so are doubled; the ZH variants are not formatted and
+# so are single.
 SYNTHESIZE_SYSTEM = """\
 You are a philosophical editor. Forge a refined argument from an adversarial dialogue.
 
@@ -299,13 +305,13 @@ Rules:
 - Use these IDs: "push_back", "reframe", "concede".
 
 Return ONLY valid JSON. No preamble. No markdown:
-{{
+{
   "perspectives": [
-    {{"id": "push_back", "label": "Push back on the premise", "hint": "...specific to this question..."}},
-    {{"id": "reframe",   "label": "Acknowledge and reframe",  "hint": "..."}},
-    {{"id": "concede",   "label": "Concede this point",       "hint": "..."}}
+    {"id": "push_back", "label": "Push back on the premise", "hint": "...specific to this question..."},
+    {"id": "reframe",   "label": "Acknowledge and reframe",  "hint": "..."},
+    {"id": "concede",   "label": "Concede this point",       "hint": "..."}
   ]
-}}\
+}\
 """
 
 SUGGEST_PERSPECTIVES_USER = """\
@@ -465,14 +471,14 @@ ZH_SYNTHESIZE_SYSTEM = """\
 在仔细考虑了各种攻击和用户提供的深思熟虑的回应之后，很明显原始主张有一定的优点，但需要大量修正。通过这一辩证过程，我们达到了更细致的理解。
 
 按以下确切模式生成 argument_map：
-{{
+{
   "core_claim": "原始核心主张原文",
   "refined_claim": "新的可辩护版本——一句话",
   "warrants": ["名词短语最多 2 个字", "名词短语"],
   "concessions": ["一个名词短语"],
   "remaining_vulnerabilities": ["一个名词短语"],
   "confidence_delta": "+N%"
-}}
+}
 
 论点地图——格式规则：
 - "warrants"：最多 2 项，每项为名词短语（非完整句子）
@@ -565,13 +571,13 @@ ZH_SUGGEST_PERSPECTIVES_SYSTEM = """\
 - 用中文写 label 和 hint。
 
 只返回合法 JSON，不要任何前言或 Markdown：
-{{
+{
   "perspectives": [
-    {{"id": "push_back", "label": "反驳问题前提", "hint": "……针对这个问题的具体内容……"}},
-    {{"id": "reframe",   "label": "承认并重构",   "hint": "……"}},
-    {{"id": "concede",   "label": "让步这一点",   "hint": "……"}}
+    {"id": "push_back", "label": "反驳问题前提", "hint": "……针对这个问题的具体内容……"},
+    {"id": "reframe",   "label": "承认并重构",   "hint": "……"},
+    {"id": "concede",   "label": "让步这一点",   "hint": "……"}
   ]
-}}\
+}\
 """
 
 ZH_SUGGEST_PERSPECTIVES_USER = """\
