@@ -29,6 +29,7 @@ export default function App() {
     attacks,
     socraticQuestions,
     synthesis, argumentMap,
+    error, errorNode,
     startSession, submitResponses, reset,
   } = useDialectica()
 
@@ -171,6 +172,8 @@ export default function App() {
             synthesis={synthesis}
             argumentMap={argumentMap}
             onSubmitResponses={submitResponses}
+            error={error}
+            errorNode={errorNode}
             lang={lang}
           />
           <Footer lang={lang} />

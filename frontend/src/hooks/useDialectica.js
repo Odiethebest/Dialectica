@@ -16,6 +16,7 @@ const INITIAL = {
   synthesis: '',
   argumentMap: null,
   error: null,
+  errorNode: null,   // which pipeline node failed, when the backend reports one
 }
 
 
@@ -83,7 +84,12 @@ export function useDialectica() {
           break
 
         case 'error':
-          patch({ mode: 'error', currentNode: null, error: data.message })
+          patch({
+            mode: 'error',
+            currentNode: null,
+            error: data.message,
+            errorNode: data.node ?? null,
+          })
           break
 
         default:

@@ -7,6 +7,8 @@ import ResponseForm from './blocks/ResponseForm'
 import SynthesisBlock from './blocks/SynthesisBlock'
 import { t } from '../i18n/strings'
 
+const PIPELINE_NODES = ['understand', 'steelman', 'attack', 'interrogate', 'synthesize']
+
 export default function DialogueThread({
   originalClaim,
   sessionId,
@@ -21,9 +23,17 @@ export default function DialogueThread({
   synthesis,
   argumentMap,
   onSubmitResponses,
+  error,
+  errorNode,
   lang = 'en',
 }) {
   const streaming = (node) => mode === 'streaming' && currentNode === node
+
+  // Name the stage that failed, using the same localized labels as PipelineStatus
+  const failedStage = (() => {
+    const i = PIPELINE_NODES.indexOf(errorNode)
+    return i >= 0 ? t(lang, 'pipelineNodes')[i] : null
+  })()
 
   return (
     <div style={{ marginTop: '1.5rem' }}>
@@ -83,14 +93,14 @@ export default function DialogueThread({
       )}
 
       {mode === 'error' && (
-        <p style={{
+        <p title={error || undefined} style={{
           fontFamily: 'var(--d-serif)',
           fontSize: 13,
           fontStyle: 'italic',
           color: 'var(--d-attack)',
           marginTop: 8,
         }}>
-          {t(lang, 'errorMsg')}
+          {failedStage ? `${failedStage} · ${t(lang, 'errorMsg')}` : t(lang, 'errorMsg')}
         </p>
       )}
 
