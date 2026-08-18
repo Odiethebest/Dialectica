@@ -104,6 +104,50 @@ def _llm(model: str | None = None) -> ChatOpenAI:
     )
 
 
+async def _stream_graph_events(stream_input, config: dict, req: Request,
+                               session_id: str, status: dict):
+    """
+    Yield SSE frames for one graph run, recording why it ended in `status`.
+
+    Nodes swallow their own exceptions and return {"error": ...} rather than
+    raising, so a failure is invisible at the stream level. Without this check a
+    failed node emits an empty block and the pipeline keeps running on garbage.
+    """
+    async for event in graph.astream_events(stream_input, config=config, version="v2"):
+        if await req.is_disconnected():
+            logger.info("Client disconnected: session=%s", session_id)
+            status["disconnected"] = True
+            return
+
+        name = event.get("name", "")
+        kind = event.get("event", "")
+
+        if kind == "on_chain_start" and name in NODE_NAMES:
+            yield {"event": "node_start", "data": safe_json({"node": name})}
+
+        elif kind == "on_chat_model_stream" and name in NODE_NAMES:
+            chunk = event["data"].get("chunk")
+            if chunk and hasattr(chunk, "content") and chunk.content:
+                yield {"event": "token", "data": safe_json({"node": name, "token": chunk.content})}
+
+        elif kind == "on_chain_end" and name in NODE_NAMES:
+            output = event["data"].get("output") or {}
+            yield {"event": "node_end", "data": safe_json({"node": name, "output": output})}
+            if isinstance(output, dict) and output.get("error"):
+                logger.error("Node failed: session=%s node=%s error=%s",
+                             session_id, name, output["error"])
+                status["error"] = output["error"]
+                status["failed_node"] = name
+                return
+
+
+def _node_error_frame(status: dict) -> dict:
+    return {"event": "error", "data": safe_json({
+        "message": status["error"],
+        "node": status.get("failed_node"),
+    })}
+
+
 # ── Endpoints ────────────────────────────────────────────────────────────────
 
 @app.get("/health")
@@ -171,41 +215,41 @@ async def start(body: StartRequest, req: Request):
         # First event: hand the session_id to the client
         yield {"event": "session", "data": safe_json({"session_id": session_id})}
 
+        status: dict = {}
         try:
-            async for event in graph.astream_events(initial_state, config=config, version="v2"):
-                if await req.is_disconnected():
-                    logger.info("Client disconnected: %s", session_id)
-                    break
+            async for frame in _stream_graph_events(initial_state, config, req, session_id, status):
+                yield frame
 
-                name = event.get("name", "")
-                kind = event.get("event", "")
+            if status.get("disconnected"):
+                return
+            if status.get("error"):
+                yield _node_error_frame(status)
+                return
 
-                if kind == "on_chain_start" and name in NODE_NAMES:
-                    yield {"event": "node_start", "data": safe_json({"node": name})}
-
-                elif kind == "on_chat_model_stream" and name in NODE_NAMES:
-                    chunk = event["data"].get("chunk")
-                    if chunk and hasattr(chunk, "content") and chunk.content:
-                        yield {"event": "token", "data": safe_json({"node": name, "token": chunk.content})}
-
-                elif kind == "on_chain_end" and name in NODE_NAMES:
-                    output = event["data"].get("output", {})
-                    yield {"event": "node_end", "data": safe_json({"node": name, "output": output})}
-
-            # Graph either paused at interrupt or finished
+            # Graph either paused at the interrupt or finished
             state = graph.get_state(config)
+            values = state.values
+
             if "synthesize" in (state.next or []):
-                questions = state.values.get("socratic_questions", [])
+                questions = values.get("socratic_questions") or []
+                if not questions:
+                    # interrogate produced nothing. Emitting awaiting_input here
+                    # would strand the client: it flips to the answering state but
+                    # renders no form, with no error and no way forward.
+                    yield {"event": "error", "data": safe_json({
+                        "message": "No Socratic questions were generated.",
+                        "node": "interrogate",
+                    })}
+                    return
                 yield {"event": "awaiting_input", "data": safe_json({"questions": questions})}
             else:
-                values = state.values
                 yield {"event": "complete", "data": safe_json({
                     "synthesis": values.get("synthesis", ""),
                     "argument_map": values.get("argument_map", {}),
                 })}
 
         except Exception as e:
-            logger.exception("Error in /dialectica/start stream")
+            logger.exception("Error in /dialectica/start stream: session=%s", session_id)
             yield {"event": "error", "data": safe_json({"message": str(e)})}
 
     return EventSourceResponse(event_generator())
@@ -229,37 +273,26 @@ async def respond(body: RespondRequest, req: Request):
     graph.update_state(config, {"user_responses": body.responses, "awaiting_user": False})
 
     async def event_generator():
+        status: dict = {}
         try:
             # Resume from the interrupt (synthesize node)
-            async for event in graph.astream_events(None, config=config, version="v2"):
-                if await req.is_disconnected():
-                    logger.info("Client disconnected during respond: %s", body.session_id)
-                    break
+            async for frame in _stream_graph_events(None, config, req, body.session_id, status):
+                yield frame
 
-                name = event.get("name", "")
-                kind = event.get("event", "")
+            if status.get("disconnected"):
+                return
+            if status.get("error"):
+                yield _node_error_frame(status)
+                return
 
-                if kind == "on_chain_start" and name in NODE_NAMES:
-                    yield {"event": "node_start", "data": safe_json({"node": name})}
-
-                elif kind == "on_chat_model_stream" and name in NODE_NAMES:
-                    chunk = event["data"].get("chunk")
-                    if chunk and hasattr(chunk, "content") and chunk.content:
-                        yield {"event": "token", "data": safe_json({"node": name, "token": chunk.content})}
-
-                elif kind == "on_chain_end" and name in NODE_NAMES:
-                    output = event["data"].get("output", {})
-                    yield {"event": "node_end", "data": safe_json({"node": name, "output": output})}
-
-            state = graph.get_state(config)
-            values = state.values
+            values = graph.get_state(config).values
             yield {"event": "complete", "data": safe_json({
                 "synthesis": values.get("synthesis", ""),
                 "argument_map": values.get("argument_map", {}),
             })}
 
         except Exception as e:
-            logger.exception("Error in /dialectica/respond stream")
+            logger.exception("Error in /dialectica/respond stream: session=%s", body.session_id)
             yield {"event": "error", "data": safe_json({"message": str(e)})}
 
     return EventSourceResponse(event_generator())
