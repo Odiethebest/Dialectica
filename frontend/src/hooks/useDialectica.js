@@ -1,24 +1,6 @@
 import { useState, useRef, useCallback } from 'react'
 import { readSSE } from '../utils/readSSE'
-
-const INITIAL = {
-  mode: 'idle',           // idle | streaming | awaiting_input | complete | error
-  currentNode: null,      // understand | steelman | attack | interrogate | synthesize
-  sessionId: null,
-  coreClaim: '',
-  claimAssumptions: [],
-  steelmanText: '',
-  steelmanSources: [],
-  attacks: [],
-  attackUrls: [],
-  socraticQuestions: [],
-  userResponses: ['', '', ''],
-  synthesis: '',
-  argumentMap: null,
-  error: null,
-  errorNode: null,   // which pipeline node failed, when the backend reports one
-}
-
+import { INITIAL, TERMINAL_EVENTS, reduceEvent } from './dialecticaEvents'
 
 export function useDialectica() {
   const [state, setState] = useState(INITIAL)
@@ -26,107 +8,46 @@ export function useDialectica() {
 
   const patch = (updates) => setState(s => ({ ...s, ...updates }))
 
+  /** Returns true if the stream ended in a known terminal state. */
   const processStream = useCallback(async (response) => {
+    let sawTerminal = false
     for await (const { type, data } of readSSE(response)) {
-      switch (type) {
-        case 'session':
-          sessionIdRef.current = data.session_id
-          patch({ sessionId: data.session_id })
-          break
-
-        case 'node_start':
-          patch({ currentNode: data.node, mode: 'streaming' })
-          break
-
-        case 'node_end': {
-          const { node, output } = data
-          if (node === 'understand') {
-            patch({
-              coreClaim: output.core_claim ?? '',
-              claimAssumptions: output.claim_assumptions ?? [],
-            })
-          } else if (node === 'steelman') {
-            patch({
-              steelmanText: output.steelman_text ?? '',
-              steelmanSources: output.steelman_sources ?? [],
-            })
-          } else if (node === 'attack') {
-            patch({
-              attacks: output.attacks ?? [],
-              attackUrls: output.attack_urls ?? [],
-            })
-          } else if (node === 'interrogate') {
-            patch({ socraticQuestions: output.socratic_questions ?? [] })
-          } else if (node === 'synthesize') {
-            patch({
-              synthesis: output.synthesis ?? '',
-              argumentMap: output.argument_map ?? null,
-            })
-          }
-          break
-        }
-
-        case 'awaiting_input':
-          patch({
-            mode: 'awaiting_input',
-            currentNode: null,
-            socraticQuestions: data.questions ?? [],
-          })
-          break
-
-        case 'complete':
-          patch({
-            mode: 'complete',
-            currentNode: null,
-            synthesis: data.synthesis ?? '',
-            argumentMap: data.argument_map ?? null,
-          })
-          break
-
-        case 'error':
-          patch({
-            mode: 'error',
-            currentNode: null,
-            error: data.message,
-            errorNode: data.node ?? null,
-          })
-          break
-
-        default:
-          break
-      }
+      if (type === 'session') sessionIdRef.current = data.session_id
+      const update = reduceEvent(type, data)
+      if (update) patch(update)
+      if (TERMINAL_EVENTS.has(type)) sawTerminal = true
     }
+    return sawTerminal
   }, [])
 
-  const startSession = useCallback(async (claim, lang = 'en') => {
-    patch({ mode: 'streaming', currentNode: null, error: null })
+  // A non-2xx response body is not SSE, so readSSE yields nothing and the loop
+  // exits immediately. Without these two guards `mode` stayed 'streaming' and the
+  // pipeline spun forever with no message — the usual trigger being a 502 while
+  // Railway redeploys.
+  const run = useCallback(async (url, body, pending) => {
+    patch({ ...pending, error: null })
     try {
-      const res = await fetch('/dialectica/start', {
+      const res = await fetch(url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ claim, lang }),
+        body: JSON.stringify(body),
       })
-      await processStream(res)
+      if (!res.ok) throw new Error(`Server error (${res.status})`)
+      if (!await processStream(res)) throw new Error('Connection closed before the pipeline finished.')
     } catch (err) {
-      patch({ mode: 'error', error: err.message })
+      patch({ mode: 'error', currentNode: null, error: err.message })
     }
   }, [processStream])
 
-  const submitResponses = useCallback(async (responses) => {
+  const startSession = useCallback((claim, lang = 'en') =>
+    run('/dialectica/start', { claim, lang }, { mode: 'streaming', currentNode: null }), [run])
+
+  const submitResponses = useCallback((responses) => {
     const sessionId = sessionIdRef.current
     if (!sessionId) return
-    patch({ mode: 'streaming', currentNode: 'synthesize', error: null })
-    try {
-      const res = await fetch('/dialectica/respond', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ session_id: sessionId, responses }),
-      })
-      await processStream(res)
-    } catch (err) {
-      patch({ mode: 'error', error: err.message })
-    }
-  }, [processStream])
+    return run('/dialectica/respond', { session_id: sessionId, responses },
+      { mode: 'streaming', currentNode: 'synthesize' })
+  }, [run])
 
   const setUserResponse = useCallback((index, value) => {
     setState(s => {
