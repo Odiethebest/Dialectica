@@ -1,8 +1,7 @@
 import ParchmentBlock from '../ParchmentBlock'
 import ReadMoreText from '../ReadMoreText'
 import { t } from '../../i18n/strings'
-
-const ROMAN = ['I', 'II', 'III']
+import { numeral } from '../../utils/responses'
 
 function parseAttack(raw) {
   const match = raw.match(/^\[(.+?)\]\s*(.+)$/s)
@@ -24,7 +23,7 @@ export default function AttackBlock({ attacks, attackUrls, isStreaming, lang = '
               className="attack-item"
               style={{ animationDelay: `${i * 80}ms` }}
             >
-              <span className="attack-numeral">{ROMAN[i]}.</span>
+              <span className="attack-numeral">{numeral(i)}.</span>
               <div>
                 <ReadMoreText text={text} className="block-body" lang={lang} />
                 {source && (

@@ -1,8 +1,7 @@
 import { useState } from 'react'
 import { readSSE } from '../../utils/readSSE'
 import { t } from '../../i18n/strings'
-
-const ROMAN = ['I', 'II', 'III']
+import { numeral, allAnswered } from '../../utils/responses'
 
 // ── ResponseTextarea (Tier 2 + Tier 3) ────────────────────────────────────────
 
@@ -93,12 +92,12 @@ function ResponseTextarea({ index, value, onChange, sessionId, stance, lang }) {
 
   return (
     <div className="d-response-field">
-      <div className="d-response-qnum">{ROMAN[index]}.</div>
+      <div className="d-response-qnum">{numeral(index)}.</div>
       <div className="d-response-right">
         <textarea
           className="d-textarea d-response-ta"
           rows={3}
-          placeholder={t(lang, 'responsePlaceholder')(ROMAN[index])}
+          placeholder={t(lang, 'responsePlaceholder')(numeral(index))}
           value={value}
           onChange={e => onChange(e.target.value)}
         />
@@ -141,7 +140,8 @@ function ResponseTextarea({ index, value, onChange, sessionId, stance, lang }) {
 
 export default function ResponseForm({ questions, sessionId, onSubmit, lang = 'en' }) {
   const [stance, setStance] = useState('nuanced')
-  const [responses, setResponses] = useState(['', '', ''])
+  // One slot per question — never a fixed three
+  const [responses, setResponses] = useState(() => questions.map(() => ''))
   const [autoFilling, setAutoFilling] = useState(false)
   const [autoFillError, setAutoFillError] = useState(null)
 
@@ -151,8 +151,12 @@ export default function ResponseForm({ questions, sessionId, onSubmit, lang = 'e
     { id: 'concede', label: t(lang, 'stanceConcede') },
   ]
 
-  const setResponse = (i, val) =>
+  const setResponse = (i, val) => {
+    if (i < 0 || i >= questions.length) return
     setResponses(prev => { const next = [...prev]; next[i] = val; return next })
+  }
+
+  const complete = allAnswered(questions, responses)
 
   const handleAutoFillAll = async () => {
     setAutoFilling(true)
@@ -166,10 +170,11 @@ export default function ResponseForm({ questions, sessionId, onSubmit, lang = 'e
         body: JSON.stringify({ session_id: sessionId, stance }),
       })
       for await (const { type, data } of readSSE(res)) {
-        if (type === 'response_1')      { setResponse(0, data.text); filled++ }
-        else if (type === 'response_2') { setResponse(1, data.text); filled++ }
-        else if (type === 'response_3') { setResponse(2, data.text); filled++ }
-        else if (type === 'error')      { failure = data.message; break }
+        const slot = /^response_(\d+)$/.exec(type)
+        if (slot) {
+          const i = Number(slot[1]) - 1
+          if (i >= 0 && i < questions.length) { setResponse(i, data.text); filled++ }
+        } else if (type === 'error') { failure = data.message; break }
       }
       // A run that ends without emitting any response is a failure too — the
       // backend swallows JSON-parse errors into an `error` frame, but an empty
@@ -185,7 +190,7 @@ export default function ResponseForm({ questions, sessionId, onSubmit, lang = 'e
   }
 
   const handleSubmit = () => {
-    if (responses.some(r => !r.trim())) return
+    if (!complete) return
     onSubmit(responses)
   }
 
@@ -234,7 +239,7 @@ export default function ResponseForm({ questions, sessionId, onSubmit, lang = 'e
         <button
           className="d-btn-primary btn-submit"
           onClick={handleSubmit}
-          disabled={responses.some(r => !r.trim())}
+          disabled={!complete}
         >
           {t(lang, 'submitBtn')}
         </button>

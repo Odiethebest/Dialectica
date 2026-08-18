@@ -1,7 +1,6 @@
 import ParchmentBlock from '../ParchmentBlock'
 import { t } from '../../i18n/strings'
-
-const ROMAN = ['I', 'II', 'III']
+import { numeral } from '../../utils/responses'
 
 export default function SocraticBlock({ questions, isStreaming, lang = 'en' }) {
   return (
@@ -24,7 +23,7 @@ export default function SocraticBlock({ questions, isStreaming, lang = 'en' }) {
               paddingTop: 3,
               minWidth: 22,
             }}>
-              {ROMAN[i]}.
+              {numeral(i)}.
             </span>
             <p className="block-body" style={{ margin: 0 }}>{q}</p>
           </div>
