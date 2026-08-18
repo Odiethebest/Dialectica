@@ -1,6 +1,7 @@
 import json
 import logging
 import os
+import secrets
 import subprocess
 import uuid
 from datetime import datetime, timedelta, timezone
@@ -112,10 +113,11 @@ async def health():
 
 @app.post("/admin/build-index")
 async def build_index(x_admin_key: str = Header(None)):
-    if x_admin_key != os.getenv("ADMIN_KEY", ""):
-        raise HTTPException(status_code=403)
+    # Fail closed. Comparing against os.getenv("ADMIN_KEY", "") let a request with
+    # an empty X-Admin-Key header through whenever ADMIN_KEY was not configured.
+    if not settings.admin_key or not secrets.compare_digest(x_admin_key or "", settings.admin_key):
+        raise HTTPException(status_code=403, detail="Forbidden")
 
-    import subprocess
     result = subprocess.run(
         ["python", "-m", "backend.app.rag.build_index"],
         capture_output=True, text=True,
