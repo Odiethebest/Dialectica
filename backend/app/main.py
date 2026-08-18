@@ -88,10 +88,16 @@ class SuggestPerspectivesRequest(BaseModel):
 # ── Helpers ───────────────────────────────────────────────────────────────────
 
 def _get_session_state(session_id: str):
-    """Return (session_dict, graph_state_values) or (None, None) if not found."""
+    """
+    Return (session_dict, graph_state_values), or (None, None) when the session is
+    unknown or expired. Touches last_active so a session stays alive while the user
+    works through the auxiliary endpoints, which would otherwise never refresh it.
+    """
+    cleanup_sessions()
     session = sessions.get(session_id)
     if not session:
         return None, None
+    session["last_active"] = datetime.now(timezone.utc)
     config = {"configurable": {"thread_id": session["thread_id"]}}
     state = graph.get_state(config)
     return session, state.values
