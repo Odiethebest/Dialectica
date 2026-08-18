@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useDialectica } from './hooks/useDialectica'
 import { saveToHistory } from './utils/history'
 import { detectInitialLang, saveLang } from './utils/language'
+import { readLaunchParams } from './utils/launchParams'
 import { t } from './i18n/strings'
 import ClaimInput from './components/ClaimInput'
 import PipelineStatus from './components/PipelineStatus'
@@ -80,29 +81,26 @@ export default function App() {
 
   // URL param deep-link: ?claim=...&lang=zh
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search)
-    const claimParam = params.get('claim')
-    const langParam  = params.get('lang')
+    const { claim: claimParam, lang: langParam } = readLaunchParams(window.location.search)
 
-    if (langParam === 'zh' || langParam === 'en') {
+    if (langParam) {
       // One-shot on mount: the URL is the initial source of truth for language.
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setLang(langParam)
       saveLang(langParam)
     }
 
-    if (!claimParam?.trim()) return
+    if (!claimParam) return
 
-    const decoded = decodeURIComponent(claimParam.trim()).slice(0, 200)
     window.history.replaceState({}, '', window.location.pathname)
 
-    setUrlBanner(decoded)
-    setClaim(decoded)
+    setUrlBanner(claimParam)
+    setClaim(claimParam)
 
     const bannerTimer = setTimeout(() => setUrlBanner(''), 1500)
     const startTimer  = setTimeout(() => {
       setUrlBanner('')
-      handleAutoSubmit(decoded)
+      handleAutoSubmit(claimParam)
     }, 600)
 
     return () => {
