@@ -81,6 +81,7 @@ export default function ClaimInput({ claim, onChange, onSubmit, onAutoSubmit, la
           ref={textareaRef}
           className="d-textarea"
           rows={4}
+          maxLength={2000}          /* matches MAX_CLAIM_CHARS in backend/app/main.py */
           placeholder={t(lang, 'placeholder')}
           value={claim}
           onChange={e => onChange(e.target.value)}

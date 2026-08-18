@@ -7,13 +7,15 @@ import uuid
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
+from typing import Annotated, Literal
+
 from fastapi import FastAPI, Header, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from langchain_core.messages import HumanMessage, SystemMessage
 from langchain_openai import ChatOpenAI
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from sse_starlette.sse import EventSourceResponse
 
 from .config import settings
@@ -58,31 +60,46 @@ def safe_json(obj) -> str:
 
 # ── Request / Response models ────────────────────────────────────────────────
 
+# Everything below is reachable unauthenticated. Each field that reaches a prompt
+# is bounded, because an unbounded one is billed as tokens five times over.
+MAX_CLAIM_CHARS = 2000
+MAX_ANSWER_CHARS = 2000
+MAX_HINT_CHARS = 500
+
+Answer = Annotated[str, Field(max_length=MAX_ANSWER_CHARS)]
+
+
 class StartRequest(BaseModel):
-    claim: str
-    lang: str = "en"
+    claim: str = Field(min_length=1, max_length=MAX_CLAIM_CHARS)
+    lang: Literal["en", "zh"] = "en"
 
 
 class RespondRequest(BaseModel):
     session_id: str
-    responses: list[str]
+    # At least one answer: an empty list used to run synthesize anyway, producing
+    # a "refined" argument from a dialogue the user never took part in.
+    responses: list[Answer] = Field(min_length=1, max_length=10)
 
 
 class AutoRespondRequest(BaseModel):
     session_id: str
-    stance: str  # "defend" | "concede" | "nuanced"
+    stance: Literal["defend", "concede", "nuanced"] = "nuanced"
 
 
 class AutoRespondOneRequest(BaseModel):
     session_id: str
-    question_index: int
-    stance: str
-    perspective_hint: str = ""  # set when a Tier 3 perspective was selected
+    # ge=0: only the upper bound was checked, so a negative index silently
+    # answered questions[-1] — the last question instead of the one asked for.
+    question_index: int = Field(ge=0)
+    # Not a Literal: Tier 3 sends a perspective id (push_back / reframe / concede)
+    # through this field, not just the three stances.
+    stance: str = Field(max_length=64)
+    perspective_hint: str = Field(default="", max_length=MAX_HINT_CHARS)
 
 
 class SuggestPerspectivesRequest(BaseModel):
     session_id: str
-    question_index: int
+    question_index: int = Field(ge=0)
 
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
@@ -200,7 +217,7 @@ async def start(body: StartRequest, req: Request):
     config = {"configurable": {"thread_id": thread_id}}
     initial_state = {
         "original_claim": body.claim,
-        "lang": body.lang if body.lang in ("en", "zh") else "en",
+        "lang": body.lang,
         "core_claim": "",
         "claim_assumptions": [],
         "steelman_text": "",
