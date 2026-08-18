@@ -143,6 +143,7 @@ export default function ResponseForm({ questions, sessionId, onSubmit, lang = 'e
   const [stance, setStance] = useState('nuanced')
   const [responses, setResponses] = useState(['', '', ''])
   const [autoFilling, setAutoFilling] = useState(false)
+  const [autoFillError, setAutoFillError] = useState(null)
   const [errors, setErrors] = useState([false, false, false])
 
   const STANCES = [
@@ -156,6 +157,9 @@ export default function ResponseForm({ questions, sessionId, onSubmit, lang = 'e
 
   const handleAutoFillAll = async () => {
     setAutoFilling(true)
+    setAutoFillError(null)
+    let filled = 0
+    let failure = null
     try {
       const res = await fetch('/dialectica/auto-respond', {
         method: 'POST',
@@ -163,12 +167,19 @@ export default function ResponseForm({ questions, sessionId, onSubmit, lang = 'e
         body: JSON.stringify({ session_id: sessionId, stance }),
       })
       for await (const { type, data } of readSSE(res)) {
-        if (type === 'response_1') setResponse(0, data.text)
-        else if (type === 'response_2') setResponse(1, data.text)
-        else if (type === 'response_3') setResponse(2, data.text)
+        if (type === 'response_1')      { setResponse(0, data.text); filled++ }
+        else if (type === 'response_2') { setResponse(1, data.text); filled++ }
+        else if (type === 'response_3') { setResponse(2, data.text); filled++ }
+        else if (type === 'error')      { failure = data.message; break }
+      }
+      // A run that ends without emitting any response is a failure too — the
+      // backend swallows JSON-parse errors into an `error` frame, but an empty
+      // stream would otherwise leave the user with no feedback at all.
+      if (failure || filled === 0) {
+        setAutoFillError(failure || t(lang, 'autoRespondError'))
       }
     } catch (e) {
-      // fail silently
+      setAutoFillError(e.message || t(lang, 'autoRespondError'))
     } finally {
       setAutoFilling(false)
     }
@@ -208,6 +219,8 @@ export default function ResponseForm({ questions, sessionId, onSubmit, lang = 'e
           {autoFilling ? t(lang, 'generating') : t(lang, 'autoFillAll')}
         </button>
       </div>
+
+      {autoFillError && <p className="d-autofill-error">{autoFillError}</p>}
 
       {/* Tier 2 + 3 — Per-question textareas */}
       {questions.map((q, i) => (

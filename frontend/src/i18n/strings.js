@@ -54,6 +54,7 @@ export const STRINGS = {
     // Errors
     voiceNotSupported: 'Voice input requires Chrome or Safari.',
     errorMsg:          'Something went wrong. Please try again.',
+    autoRespondError:  'Generation failed. Please try again.',
   },
 
   zh: {
@@ -111,6 +112,7 @@ export const STRINGS = {
     // 错误提示
     voiceNotSupported: '语音输入需要 Chrome 或 Safari 浏览器。',
     errorMsg:          '出现错误，请重试。',
+    autoRespondError:  '生成失败，请重试。',
   },
 }
 

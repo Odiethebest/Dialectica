@@ -935,6 +935,14 @@ body {
   color: var(--d-maroon);
 }
 
+.d-autofill-error {
+  font-family: var(--d-serif);
+  font-size: 12px;
+  font-style: italic;
+  color: var(--d-maroon);
+  margin: -10px 0 14px;
+}
+
 /* ── Perspective picker (Tier 3) ──────────────────────────────────────────── */
 
 .d-perspective-picker {
@@ -1138,6 +1146,12 @@ body {
 
 .lang-zh .d-history-label {
   font-family: var(--d-sans-zh);
+}
+
+.lang-zh .d-suggest-error,
+.lang-zh .d-autofill-error {
+  font-family: var(--d-sans-zh);
+  font-style: normal;
 }
 
 @media (max-width: 767px) {
