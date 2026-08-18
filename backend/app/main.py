@@ -464,17 +464,27 @@ async def suggest_perspectives(body: SuggestPerspectivesRequest):
 
 FRONTEND_DIST = Path(__file__).parent.parent.parent / "frontend" / "dist"
 
+# Paths the SPA fallback must never answer — a GET to a POST-only endpoint has to
+# 404 rather than return 200 text/html.
+API_PREFIXES = ("dialectica/", "admin/")
+
 if FRONTEND_DIST.exists():
-    # Serve static assets (JS, CSS)
+    _DIST_ROOT = FRONTEND_DIST.resolve()
+
+    # Hashed build output (JS, CSS)
     app.mount("/assets", StaticFiles(directory=FRONTEND_DIST / "assets"), name="assets")
 
-    # Serve root-level static files (favicon.svg, etc.)
-    @app.get("/favicon.svg")
-    async def favicon():
-        return FileResponse(FRONTEND_DIST / "favicon.svg", media_type="image/svg+xml")
-
-    # Serve index.html for all other non-API routes (SPA fallback)
     @app.get("/{full_path:path}")
     async def serve_frontend(full_path: str):
-        index = FRONTEND_DIST / "index.html"
-        return FileResponse(index)
+        if full_path.startswith(API_PREFIXES):
+            raise HTTPException(status_code=404, detail="Not Found")
+
+        # Real root-level files (favicon.svg, icons.svg, robots.txt, ...). Resolve
+        # first and confirm the result is still inside dist/ so a traversal like
+        # ../../etc/passwd cannot escape.
+        if full_path:
+            candidate = (FRONTEND_DIST / full_path).resolve()
+            if candidate.is_relative_to(_DIST_ROOT) and candidate.is_file():
+                return FileResponse(candidate)
+
+        return FileResponse(FRONTEND_DIST / "index.html")
