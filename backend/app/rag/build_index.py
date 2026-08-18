@@ -11,6 +11,7 @@ text-embedding-3-small, and persists to ChromaDB.
 import json
 import logging
 import os
+import re
 from pathlib import Path
 
 from langchain.schema import Document
@@ -24,14 +25,55 @@ logger = logging.getLogger(__name__)
 # Paths relative to this file: backend/app/rag/build_index.py
 BACKEND_DIR = Path(__file__).parent.parent.parent
 CORPUS_DIR = BACKEND_DIR / "data" / "corpus"
-CHROMA_DB_PATH = os.getenv("CHROMA_DB_PATH", "/data/chroma_db")
-CHROMA_DIR = Path(CHROMA_DB_PATH)
 COLLECTION_NAME = "dialectica_corpus"
+
+SECTION_RE = re.compile(r"^===\s*(.+?)\s*===\s*$", re.M)
+
+
+def _work_title(first_line: str, fallback: str) -> str:
+    """'ARISTOTLE'S RHETORIC: KEY CONCEPTS...' -> 'Aristotle's Rhetoric'."""
+    head = first_line.split(":")[0].strip()
+    return head.title().replace("'S", "'s") if head else fallback
 
 
 def load_text_file(path: Path) -> list[Document]:
-    text = path.read_text(encoding="utf-8")
-    return [Document(page_content=text, metadata={"source": path.name, "type": "text"})]
+    """
+    One Document per '=== SECTION ===' block, each carrying a citation label.
+
+    A whole-file Document labelled 'epistemology.txt' gives the nodes nothing
+    they can attribute. The section heading is the name of the actual concept,
+    so it becomes the citation: 'Epistemology - Inference to the best
+    explanation'.
+    """
+    lines = path.read_text(encoding="utf-8").splitlines()
+    work = _work_title(lines[0] if lines else "", path.stem)
+    body = "\n".join(lines[1:])
+
+    # one capture group -> [preamble, name1, text1, name2, text2, ...]
+    parts = SECTION_RE.split(body)
+    docs = []
+    for name, text in zip(parts[1::2], parts[2::2]):
+        text = text.strip()
+        if not text:
+            continue
+        section = name.strip().capitalize()
+        docs.append(Document(
+            # heading kept in the body so it can be matched by the retriever too
+            page_content=f"{section}\n\n{text}",
+            metadata={
+                "source": path.name,
+                "type": "text",
+                "work": work,
+                "section": section,
+                "citation": f"{work} \u00b7 {section}",
+            },
+        ))
+    if not docs:
+        docs.append(Document(
+            page_content=body.strip(),
+            metadata={"source": path.name, "type": "text", "work": work, "citation": work},
+        ))
+    return docs
 
 
 def load_json_fallacies(path: Path) -> list[Document]:
@@ -46,7 +88,12 @@ def load_json_fallacies(path: Path) -> list[Document]:
         )
         docs.append(Document(
             page_content=content,
-            metadata={"source": path.name, "type": "fallacy", "name": entry["name"]}
+            metadata={
+                "source": path.name,
+                "type": "fallacy",
+                "name": entry["name"],
+                "citation": f"Logical fallacy \u00b7 {entry['name']}",
+            },
         ))
     return docs
 
@@ -91,6 +138,10 @@ def split_documents(docs: list[Document]) -> list[Document]:
 
 
 def build_index() -> None:
+    # Resolved here rather than at import: __main__ calls load_dotenv() first, so
+    # a module-level constant would miss CHROMA_DB_PATH coming from .env.
+    chroma_dir = Path(os.getenv("CHROMA_DB_PATH", "/data/chroma_db"))
+
     if not CORPUS_DIR.exists():
         raise FileNotFoundError(f"Corpus directory not found: {CORPUS_DIR}")
 
@@ -106,15 +157,27 @@ def build_index() -> None:
     from ..config import settings
     embeddings = OpenAIEmbeddings(model="text-embedding-3-small", api_key=settings.openai_api_key)
 
-    logger.info("Building ChromaDB index at: %s", CHROMA_DIR)
-    CHROMA_DIR.mkdir(exist_ok=True)
+    logger.info("Building ChromaDB index at: %s", chroma_dir)
+    chroma_dir.mkdir(parents=True, exist_ok=True)
+
+    # Chroma.from_documents appends. Without dropping the collection first, every
+    # rebuild left another full copy of the corpus in the index.
+    try:
+        Chroma(
+            collection_name=COLLECTION_NAME,
+            embedding_function=embeddings,
+            persist_directory=str(chroma_dir),
+        ).delete_collection()
+        logger.info("Dropped existing collection '%s'", COLLECTION_NAME)
+    except Exception:
+        logger.info("No existing collection to drop")
 
     logger.info("Embedding %d chunks...", len(chunks))
     vectorstore = Chroma.from_documents(
         documents=chunks,
         embedding=embeddings,
         collection_name=COLLECTION_NAME,
-        persist_directory=str(CHROMA_DIR),
+        persist_directory=str(chroma_dir),
     )
 
     logger.info(

@@ -138,7 +138,7 @@ async def steelman(state: DialecticaState) -> dict:
         # RAG retrieval — argumentation/epistemology framing, not empirical support
         docs = retrieve(state["core_claim"], k=3)
         rag_context = "\n\n".join(
-            f"[{doc.metadata.get('name', doc.metadata.get('source', 'Source'))}]\n{doc.page_content}"
+            f"[{doc.metadata.get('citation') or doc.metadata.get('source', 'Source')}]\n{doc.page_content}"
             for doc in docs
         )
 
@@ -183,7 +183,7 @@ async def attack(state: DialecticaState) -> dict:
         rag_query = f"counterargument against: {state['core_claim']}"
         docs = retrieve(rag_query, k=3)
         rag_context = "\n\n".join(
-            f"[{doc.metadata.get('name', doc.metadata.get('source', 'Source'))}]\n{doc.page_content}"
+            f"[{doc.metadata.get('citation') or doc.metadata.get('source', 'Source')}]\n{doc.page_content}"
             for doc in docs
         )
 
