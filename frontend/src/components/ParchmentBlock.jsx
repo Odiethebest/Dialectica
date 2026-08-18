@@ -20,6 +20,10 @@ export default function ParchmentBlock({ type = 'claim', label, isStreaming, chi
   // (Re-)generate SVG once streaming stops and layout is settled
   useEffect(() => {
     if (isStreaming) {
+      // Deliberate: dropping the SVG is what switches this block back to the
+      // plain streaming branch. The two-phase render exists so the path is
+      // measured against settled content — see Docs/Arch/design-frontend.md.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setSvg(null)
       return
     }

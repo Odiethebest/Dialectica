@@ -85,6 +85,8 @@ export default function App() {
     const langParam  = params.get('lang')
 
     if (langParam === 'zh' || langParam === 'en') {
+      // One-shot on mount: the URL is the initial source of truth for language.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setLang(langParam)
       saveLang(langParam)
     }

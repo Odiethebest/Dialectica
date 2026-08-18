@@ -8,7 +8,7 @@ export function saveToHistory(claim) {
   const updated = [claim, ...filtered].slice(0, MAX_HISTORY)
   try {
     localStorage.setItem(HISTORY_KEY, JSON.stringify(updated))
-  } catch (e) {
+  } catch {
     // localStorage unavailable — fail silently
   }
 }
@@ -17,11 +17,15 @@ export function getHistory() {
   try {
     const raw = localStorage.getItem(HISTORY_KEY)
     return raw ? JSON.parse(raw) : []
-  } catch (e) {
+  } catch {
     return []
   }
 }
 
 export function clearHistory() {
-  try { localStorage.removeItem(HISTORY_KEY) } catch (e) {}
+  try {
+    localStorage.removeItem(HISTORY_KEY)
+  } catch {
+    // localStorage unavailable — fail silently
+  }
 }
