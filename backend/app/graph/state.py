@@ -12,7 +12,7 @@ class DialecticaState(TypedDict):
     steelman_text: str            # steelman: strongest version of the claim
     steelman_sources: list[str]   # steelman: RAG sources used
     attacks: list[str]            # attack: counterarguments
-    attack_sources: list[str]     # attack: RAG + web sources
+    attack_urls: list[str]        # attack: per-attack citation URL ("" when unlinked)
     socratic_questions: list[str] # interrogate: exactly 3 questions
     user_responses: list[str]     # user answers to Socratic questions
     synthesis: str                # synthesize: final refined argument

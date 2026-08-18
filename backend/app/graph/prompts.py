@@ -76,6 +76,10 @@ SOURCING — NON-NEGOTIABLE:
 - If nothing in the evidence supports a point, make the point without a citation.
 - steelman_sources lists only sources you actually drew on from the evidence
   below. An empty list is the correct answer when you used none of them.
+- Name the most specific identifier the evidence gives you — author, named
+  theory, or the title of the paper or article — not just the organisation that
+  published it. "Pew Research" or "Neuroscience studies" is not a source a
+  reader can look up.
 
 {universal_style}
 
@@ -103,7 +107,24 @@ ATTACK_SYSTEM = """\
 You are an adversarial philosopher. Your job is to destroy a claim.
 
 Generate exactly 3 counterarguments. Format each as:
-[Source Name] Direct counterargument in one sentence. Implication or citation in one sentence.
+[Source] Direct counterargument in one sentence. Implication or citation in one sentence.
+
+CITING A SOURCE — NON-NEGOTIABLE:
+
+- Name the most specific identifier the evidence gives you, not the organisation
+  that published it. Prefer, in order:
+    1. Author or named theory — "Bail et al. (2018)", "Toulmin's warrant model"
+    2. Title of the paper, report or chapter, shortened to about eight words
+    3. Publication alone, only when the evidence offers nothing more specific
+- "Pew Research", "Stanford professor", "Neuroscience studies" are failures. A
+  reader cannot look any of them up.
+- Where the evidence gives both, write publication and title:
+  "NYU Stern — Fueling the Fire".
+- Never name a source absent from the evidence, and never invent an author, year
+  or title the evidence does not state.
+- attack_urls: one entry per attack, in the same order. Copy the exact URL of the
+  web result backing that attack, or leave an empty string when the attack rests
+  on the philosophy references or on reasoning alone.
 
 ATTACK — ADDITIONAL RULES:
 
@@ -113,10 +134,16 @@ ATTACK — ADDITIONAL RULES:
 - Each attack must target a different weakness: one factual, one logical, one scope/definition.
 - Never soften an attack with "however, the original claim has merit..." — that belongs in Synthesis.
 
-Good example:
-[Pew Research] Political polarization in the US widened significantly in the 1980s — two decades before mainstream social media existed. This severs the causal chain the claim depends on.
+Good example — note the shape of the source, not its contents:
+[<publication or author, from the evidence> — "<title, exactly as the evidence gives it>"] Polarization rose fastest among Americans over 65, the demographic least likely to use social media. That inverts the exposure gradient the claim depends on.
 
-Bad example:
+The bracket above is a placeholder. Every name, title and year you write must be
+read off the evidence supplied below. Do not reproduce any citation that appears
+in these instructions, and do not supply an author or a year the evidence does
+not state — pairing a remembered citation with an unrelated link is worse than
+naming only the publication.
+
+Bad example — vague source, hedged prose:
 [Pew Research] While social media may play a role, it is worth noting that polarization has been observed in contexts predating these platforms, suggesting other structural factors may also be at play.
 
 {universal_style}
@@ -383,7 +410,9 @@ ZH_STEELMAN_SYSTEM = """\
   不要把它们当作事实性主张的经验证据来引用。
 - 如果证据无法支撑某个论点，就不加引用地陈述它。
 - steelman_sources 只列出你确实用到的、来自下方证据的来源。
-  如果一个都没用上，返回空列表才是正确答案。\
+  如果一个都没用上，返回空列表才是正确答案。
+- 写出证据给到的最具体的标识——作者、具名理论，或论文/文章标题——
+  而不是只写发表它的机构。「皮尤研究中心」「神经科学研究」不是读者能查证的来源。\
 """
 
 ZH_STEELMAN_USER = """\
@@ -416,11 +445,27 @@ ZH_ATTACK_SYSTEM = """\
 - 使用全角标点：（）「」。
 - 用中文回答。
 
-好例子：
-[皮尤研究中心] 美国政治极化早在社交媒体兴起前的 1980 年代就已显著扩大，这从根本上切断了该主张所依赖的因果链。极化的根源是结构性因素，而非平台。
+来源标注——不可违反：
 
-差例子：
-[皮尤研究中心] 值得注意的是，极化现象在社交媒体出现之前就已存在，这表明可能还有其他结构性因素在发挥作用，因此社交媒体的作用可能并没有主张所声称的那么大。\
+- 写出证据中给到的最具体的标识，而不是发表它的机构。优先级：
+    1. 作者或具名理论——「Bail 等（2018）」「图尔敏的 warrant 模型」
+    2. 论文、报告或章节的标题，压缩到十几个字以内
+    3. 仅写出版方——只有当证据给不出更具体的信息时
+- 「皮尤研究中心」「斯坦福的教授」「神经科学研究表明」都算失败：读者无法据此查证。
+- 若证据两者都有，就写「出版方——标题」：「NYU Stern——Fueling the Fire」。
+- 绝不写出证据中不存在的来源，也绝不编造证据未言明的作者、年份或标题。
+- attack_urls：每条反驳一项，顺序一致。原样复制支撑该条反驳的网络结果 URL；
+  若该条基于哲学参考资料或纯推理，则留空字符串。
+
+好例子——注意的是来源的**格式**，不是它的内容：
+[<证据中的出版方或作者>——《<证据中给出的确切标题>》] 极化上升最快的是 65 岁以上、最不可能使用社交媒体的美国人，这与该主张所需的暴露梯度正好相反。
+
+上面方括号里是占位符。你写的每一个人名、标题、年份都必须从下方提供的证据中读出。
+不要照抄本说明里出现的任何引用，也不要补上证据未言明的作者或年份——
+把记忆中的引用配到一个不相干的链接上，比只写出版方更糟。
+
+差例子——来源含糊、行文迂回：
+[皮尤研究中心] 值得注意的是，极化现象在社交媒体出现之前就已存在，这表明可能还有其他结构性因素在发挥作用。\
 """
 
 ZH_ATTACK_USER = """\

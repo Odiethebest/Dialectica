@@ -934,6 +934,16 @@ body {
   color: var(--d-maroon);
 }
 
+.d-source-link {
+  color: inherit;
+  text-decoration: underline;
+  text-decoration-color: rgba(196, 152, 58, 0.55);
+  text-underline-offset: 2px;
+  transition: color 100ms ease;
+}
+
+.d-source-link:hover { color: var(--d-gold3); }
+
 .d-autofill-error {
   font-family: var(--d-serif);
   font-size: 12px;

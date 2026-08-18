@@ -10,7 +10,7 @@ const INITIAL = {
   steelmanText: '',
   steelmanSources: [],
   attacks: [],
-  attackSources: [],
+  attackUrls: [],
   socraticQuestions: [],
   userResponses: ['', '', ''],
   synthesis: '',
@@ -53,7 +53,7 @@ export function useDialectica() {
           } else if (node === 'attack') {
             patch({
               attacks: output.attacks ?? [],
-              attackSources: output.attack_sources ?? [],
+              attackUrls: output.attack_urls ?? [],
             })
           } else if (node === 'interrogate') {
             patch({ socraticQuestions: output.socratic_questions ?? [] })

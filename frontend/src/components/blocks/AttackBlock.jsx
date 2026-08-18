@@ -10,7 +10,7 @@ function parseAttack(raw) {
   return { source: null, text: raw }
 }
 
-export default function AttackBlock({ attacks, isStreaming, lang = 'en' }) {
+export default function AttackBlock({ attacks, attackUrls, isStreaming, lang = 'en' }) {
   return (
     <ParchmentBlock type="attack" label={t(lang, 'attacks')} isStreaming={isStreaming}>
       {isStreaming && !attacks?.length ? (
@@ -28,7 +28,19 @@ export default function AttackBlock({ attacks, isStreaming, lang = 'en' }) {
               <div>
                 <ReadMoreText text={text} className="block-body" lang={lang} />
                 {source && (
-                  <p className="block-source" style={{ marginTop: 4 }}>· {source}</p>
+                  <p className="block-source" style={{ marginTop: 4 }}>
+                    {'· '}
+                    {attackUrls?.[i] ? (
+                      <a
+                        className="d-source-link"
+                        href={attackUrls[i]}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        {source}
+                      </a>
+                    ) : source}
+                  </p>
                 )}
               </div>
             </div>

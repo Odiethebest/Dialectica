@@ -26,7 +26,7 @@ export default function App() {
     sessionId,
     coreClaim, claimAssumptions,
     steelmanText, steelmanSources,
-    attacks,
+    attacks, attackUrls,
     socraticQuestions,
     synthesis, argumentMap,
     error, errorNode,
@@ -170,6 +170,7 @@ export default function App() {
             steelmanText={steelmanText}
             steelmanSources={steelmanSources}
             attacks={attacks}
+            attackUrls={attackUrls}
             socraticQuestions={socraticQuestions}
             synthesis={synthesis}
             argumentMap={argumentMap}

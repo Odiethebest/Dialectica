@@ -37,7 +37,11 @@ class SteelmanOutput(BaseModel):
 
 class AttackOutput(BaseModel):
     attacks: list[str] = Field(description="Exactly 3 counterarguments, each prefixed with [Source]")
-    attack_sources: list[str] = Field(description="Short labels for sources drawn upon")
+    attack_urls: list[str] = Field(
+        description="One entry per attack, same order. The exact URL from the web results "
+                    "backing that attack, copied verbatim, or an empty string when the "
+                    "attack rests on the philosophy references or on reasoning alone."
+    )
 
 
 class InterrogateOutput(BaseModel):
@@ -56,6 +60,33 @@ class ArgumentMap(BaseModel):
 class SynthesizeOutput(BaseModel):
     synthesis: str = Field(description="Refined argument text (2-3 paragraphs)")
     argument_map: ArgumentMap = Field(description="Structured breakdown of the refined argument")
+
+
+# ── Evidence formatting ──────────────────────────────────────────────────────
+
+def _format_web_context(results: list[dict]) -> str:
+    """
+    Render Tavily results for a prompt. The URL is included: it is what lets the
+    model name the actual publication (cambridge.org, nature.com) instead of
+    guessing, and it is what the attack node cites back.
+    """
+    if not results:
+        return "No web results available."
+    return "\n\n".join(
+        f"[{r['title']}]\nURL: {r['url']}\n{r['content']}"
+        for r in results
+    )
+
+
+def _validate_attack_urls(urls: list[str] | None, attacks: list[str],
+                          allowed: set[str]) -> list[str]:
+    """
+    Return one citation URL per attack, keeping only links Tavily actually
+    returned. The model chooses from a closed set, so a hallucinated citation
+    link cannot reach the client even if the label around it is wrong.
+    """
+    kept = [u if u in allowed else "" for u in (urls or [])]
+    return (kept + [""] * len(attacks))[:len(attacks)]
 
 
 # ── LLM factory ──────────────────────────────────────────────────────────────
@@ -115,13 +146,7 @@ async def steelman(state: DialecticaState) -> dict:
         # argument, so for a claim about the world it grounds nothing, and the node
         # used to fill the gap by inventing institution names.
         web_results = tavily_search(f"evidence supporting: {state['core_claim']}", max_results=3)
-        if web_results:
-            web_context = "\n\n".join(
-                f"[{r['title']}]\n{r['content']}"
-                for r in web_results
-            )
-        else:
-            web_context = "No web results available."
+        web_context = _format_web_context(web_results)
 
         prompt = ChatPromptTemplate.from_messages([
             ("system", system_prompt),
@@ -164,13 +189,7 @@ async def attack(state: DialecticaState) -> dict:
 
         # Web search via Tavily
         web_results = tavily_search(f"criticism evidence against: {state['core_claim']}", max_results=3)
-        if web_results:
-            web_context = "\n\n".join(
-                f"[{r['title']}]\n{r['content']}"
-                for r in web_results
-            )
-        else:
-            web_context = "No web results available."
+        web_context = _format_web_context(web_results)
 
         user_responses_text = (
             "\n".join(f"- {r}" for r in state.get("user_responses", []))
@@ -190,10 +209,17 @@ async def attack(state: DialecticaState) -> dict:
             "web_context": web_context,
         })
 
-        logger.info("[attack] done, %d counterarguments", len(result.attacks))
+        allowed = {r["url"] for r in web_results}
+        urls = _validate_attack_urls(result.attack_urls, result.attacks, allowed)
+        dropped = len([u for u in (result.attack_urls or []) if u and u not in allowed])
+        if dropped:
+            logger.warning("[attack] dropped %d URL(s) not present in web results", dropped)
+
+        logger.info("[attack] done, %d counterarguments, %d linked", len(result.attacks),
+                    len([u for u in urls if u]))
         return {
             "attacks": result.attacks,
-            "attack_sources": result.attack_sources,
+            "attack_urls": urls,
             "current_node": "attack",
         }
     except Exception as e:

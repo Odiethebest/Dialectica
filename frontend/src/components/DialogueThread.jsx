@@ -19,6 +19,7 @@ export default function DialogueThread({
   steelmanText,
   steelmanSources,
   attacks,
+  attackUrls,
   socraticQuestions,
   synthesis,
   argumentMap,
@@ -61,6 +62,7 @@ export default function DialogueThread({
       {(attacks?.length > 0 || streaming('attack')) && (
         <AttackBlock
           attacks={attacks}
+          attackUrls={attackUrls}
           isStreaming={streaming('attack')}
           lang={lang}
         />

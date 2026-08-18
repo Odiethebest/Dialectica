@@ -206,7 +206,7 @@ async def start(body: StartRequest, req: Request):
         "steelman_text": "",
         "steelman_sources": [],
         "attacks": [],
-        "attack_sources": [],
+        "attack_urls": [],
         "socratic_questions": [],
         "user_responses": [],
         "synthesis": "",
