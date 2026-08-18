@@ -474,7 +474,7 @@ ZH_SYNTHESIZE_SYSTEM = """\
 {
   "core_claim": "原始核心主张原文",
   "refined_claim": "新的可辩护版本——一句话",
-  "warrants": ["名词短语最多 2 个字", "名词短语"],
+  "warrants": ["名词短语", "名词短语"],
   "concessions": ["一个名词短语"],
   "remaining_vulnerabilities": ["一个名词短语"],
   "confidence_delta": "+N%"
