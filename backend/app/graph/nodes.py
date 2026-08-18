@@ -29,7 +29,10 @@ class UnderstandOutput(BaseModel):
 
 class SteelmanOutput(BaseModel):
     steelman_text: str = Field(description="2-3 paragraphs making the strongest case for the claim")
-    steelman_sources: list[str] = Field(description="Short labels for sources actually used")
+    steelman_sources: list[str] = Field(
+        description="Labels for sources that actually appear in the supplied evidence. "
+                    "Empty list if none were used. Never invent a source."
+    )
 
 
 class AttackOutput(BaseModel):
@@ -101,12 +104,24 @@ async def steelman(state: DialecticaState) -> dict:
         lang = state.get("lang", "en")
         system_prompt, user_prompt = get_prompt("steelman", lang)
 
-        # RAG retrieval — search for supporting philosophical context
+        # RAG retrieval — argumentation/epistemology framing, not empirical support
         docs = retrieve(state["core_claim"], k=3)
         rag_context = "\n\n".join(
             f"[{doc.metadata.get('name', doc.metadata.get('source', 'Source'))}]\n{doc.page_content}"
             for doc in docs
         )
+
+        # Web search — real supporting evidence. The corpus is philosophy of
+        # argument, so for a claim about the world it grounds nothing, and the node
+        # used to fill the gap by inventing institution names.
+        web_results = tavily_search(f"evidence supporting: {state['core_claim']}", max_results=3)
+        if web_results:
+            web_context = "\n\n".join(
+                f"[{r['title']}]\n{r['content']}"
+                for r in web_results
+            )
+        else:
+            web_context = "No web results available."
 
         prompt = ChatPromptTemplate.from_messages([
             ("system", system_prompt),
@@ -117,6 +132,7 @@ async def steelman(state: DialecticaState) -> dict:
             "core_claim": state["core_claim"],
             "claim_assumptions": "\n".join(f"- {a}" for a in state["claim_assumptions"]),
             "rag_context": rag_context,
+            "web_context": web_context,
         })
 
         logger.info("[steelman] done, sources: %s", result.steelman_sources)

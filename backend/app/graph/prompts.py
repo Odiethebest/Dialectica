@@ -61,10 +61,21 @@ STEELMAN — ADDITIONAL RULES:
 
 - Open with the strongest version of the claim in one sentence. No setup.
 - Follow with supporting evidence. Each piece of evidence: 1–2 sentences max.
-- Cite sources inline, not as footnotes. Format: [claim]. Source: [name].
+- Cite a source inline only when the evidence below actually supports the point.
+  Format: [claim]. Source: [name].
 - Do not use "proponents of this view argue that..." — state the argument directly.
 - The steelman should feel like a confident expert making the case, not a neutral summarizer.
-- Return the sources you actually drew on as a list of short labels.
+
+SOURCING — NON-NEGOTIABLE:
+
+- Every source you name must appear in the evidence below. Never invent one.
+  Naming a real-sounding institution you were not given is the worst possible
+  failure of this node.
+- The philosophy references are about how arguments work, not about the world.
+  Do not cite them as empirical support for a factual claim.
+- If nothing in the evidence supports a point, make the point without a citation.
+- steelman_sources lists only sources you actually drew on from the evidence
+  below. An empty list is the correct answer when you used none of them.
 
 {universal_style}
 
@@ -77,8 +88,11 @@ Core claim: {core_claim}
 Underlying assumptions:
 {claim_assumptions}
 
-Relevant evidence from the knowledge base:
+Argumentation and epistemology references (about reasoning, not about the world):
 {rag_context}
+
+Web search results — supporting evidence:
+{web_context}
 
 Construct the strongest possible argument for this position.\
 """
@@ -358,9 +372,18 @@ ZH_STEELMAN_SYSTEM = """\
 - 每条支撑证据最多 1–2 句。
 - 行文风格：像一位自信的专家在陈述立场，而非中立的总结者。
 - 不要使用"该观点的支持者认为……"——直接陈述论点。
-- 来源引用格式：[论点]。来源：[名称]
+- 只有当下方证据确实支撑某个论点时才引用。格式：[论点]。来源：[名称]
 - 用中文回答。
-- 输出前自检：删除任何不直接推进论点的句子。\
+- 输出前自检：删除任何不直接推进论点的句子。
+
+来源规范——不可违反：
+- 你写出的每一个来源都必须出现在下方提供的证据中。禁止编造。
+  凭空写出一个听起来真实的机构名，是本节点最严重的失败。
+- 哲学参考资料讲的是论证如何运作，不是关于世界的事实。
+  不要把它们当作事实性主张的经验证据来引用。
+- 如果证据无法支撑某个论点，就不加引用地陈述它。
+- steelman_sources 只列出你确实用到的、来自下方证据的来源。
+  如果一个都没用上，返回空列表才是正确答案。\
 """
 
 ZH_STEELMAN_USER = """\
@@ -369,8 +392,11 @@ ZH_STEELMAN_USER = """\
 前提假设：
 {claim_assumptions}
 
-知识库中的相关证据：
+论证与认识论参考资料（关于推理方式，不是关于世界的事实）：
 {rag_context}
+
+网络搜索结果——支持性证据：
+{web_context}
 
 为这一立场构建最强论证。\
 """
